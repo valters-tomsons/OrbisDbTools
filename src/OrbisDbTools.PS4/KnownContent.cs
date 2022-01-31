@@ -30,6 +30,7 @@ namespace OrbisDbTools.PS4
             new AppTitle("NPXS20118", "Share Play"),
             new AppTitle("NPXS20120", "PlayStation™Video"),
             new AppTitle("NPXS20107", "PlayStation™Video - My Videos"),
+            new AppTitle("NPXS20106", "Music Unlimited")
         };
     }
 }
