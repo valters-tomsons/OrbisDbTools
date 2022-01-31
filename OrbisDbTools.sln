@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{17AB6755-499E-40A4-9512-026926B0F029}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrbisDbTools.Avalonia", "src\OrbisDbTools.Avalonia\OrbisDbTools.Avalonia.csproj", "{52D60282-B72D-4BB4-9684-BEDBDC06A8D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrbisDbTools.PS4", "src\OrbisDbTools.PS4\OrbisDbTools.PS4.csproj", "{3113CC36-E29C-47EC-A0AC-290D5C0F5DA8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrbisDbTools.Utils", "src\OrbisDbTools.Utils\OrbisDbTools.Utils.csproj", "{3DAADD69-BF2B-4FAC-8671-20C2450B1D11}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{52D60282-B72D-4BB4-9684-BEDBDC06A8D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52D60282-B72D-4BB4-9684-BEDBDC06A8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52D60282-B72D-4BB4-9684-BEDBDC06A8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52D60282-B72D-4BB4-9684-BEDBDC06A8D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3113CC36-E29C-47EC-A0AC-290D5C0F5DA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3113CC36-E29C-47EC-A0AC-290D5C0F5DA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3113CC36-E29C-47EC-A0AC-290D5C0F5DA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3113CC36-E29C-47EC-A0AC-290D5C0F5DA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DAADD69-BF2B-4FAC-8671-20C2450B1D11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DAADD69-BF2B-4FAC-8671-20C2450B1D11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DAADD69-BF2B-4FAC-8671-20C2450B1D11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DAADD69-BF2B-4FAC-8671-20C2450B1D11}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{52D60282-B72D-4BB4-9684-BEDBDC06A8D1} = {17AB6755-499E-40A4-9512-026926B0F029}
+		{3113CC36-E29C-47EC-A0AC-290D5C0F5DA8} = {17AB6755-499E-40A4-9512-026926B0F029}
+		{3DAADD69-BF2B-4FAC-8671-20C2450B1D11} = {17AB6755-499E-40A4-9512-026926B0F029}
+	EndGlobalSection
+EndGlobal
