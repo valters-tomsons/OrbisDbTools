@@ -2,7 +2,6 @@ using FluentFTP;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 using OrbisDbTools.PS4.Enums;
-using System.Collections.Generic;
 
 namespace OrbisDbTools.PS4.Discovery
 {
