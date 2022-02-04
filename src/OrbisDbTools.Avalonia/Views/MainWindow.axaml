@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="920" d:DesignHeight="600"
         MinWidth="920" MinHeight="600"
         MaxWidth="920" MaxHeight="600"
+        WindowStartupLocation="CenterScreen"
         x:Class="OrbisDbTools.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="OrbisDbTools.Avalonia">
@@ -16,12 +17,34 @@
 
     <Grid>
         <Image Source="/Assets/GamingBackground.png" />
-        <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15">
-            <Button Command="{Binding DownloadDb}">Download PS4 database</Button>
-            <Button Command="{Binding RecalculateDbContent}" IsEnabled="{Binding EnableDbActions}">Recalculate content size</Button>
-            <Button Command="{Binding AllowDeleteApps}" IsEnabled="{Binding EnableDbActions}">Allow delete installed content</Button>
-            <Button Command="{Binding HidePsnApps}" IsEnabled="{Binding EnableDbActions}">Hide PSN Apps</Button>
-            <Button Command="{Binding ForceDc}">Force Disconnect</Button>
+
+        <Grid IsVisible="{Binding !EnableDbActions}" Name="PsConnection" HorizontalAlignment="Center" >
+            <TextBlock 
+                Margin="100" Text="Connect to your system" 
+                FontSize="48" FontFamily="SF Pro Display" VerticalAlignment="Top"/>
+
+            <TextBlock 
+                Text="Please enable FTP server on your PlayStation®4, then enter IP address of your console below." 
+                FontSize="16" FontFamily="SF Pro Display" VerticalAlignment="Center"
+                MaxWidth="350" TextWrapping="Wrap" TextAlignment="Center" Margin="0, 0, 0, 60"/>
+
+            <TextBox 
+                FontSize="16" FontFamily="SF Pro Display" Height="40" Width="300" 
+                VerticalAlignment="Center" Margin="0, 80, 0, 0" Watermark="192.168.[*].[*]:2121"
+                Text="{Binding ConsoleIpAddress}"/>
+
+            <Button 
+                VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 100" 
+                Content="CONNECT" Foreground="#bb86fc" FontFamily="SF Pro Display" FontSize="20"
+                Command="{Binding ConnectDb}"/>
+        </Grid>
+
+        <StackPanel IsVisible="{Binding EnableDbActions}" Name="AppDbActions" Orientation="Vertical" VerticalAlignment="Center" Margin="15">
+            <Button Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
+            <Button Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
+            <Button Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
+
+            <Button Command="{Binding ForceDc}">Force DB Disconnect</Button>
         </StackPanel>
     </Grid>
 

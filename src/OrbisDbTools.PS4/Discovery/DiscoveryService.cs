@@ -11,16 +11,15 @@ namespace OrbisDbTools.PS4.Discovery
 
         public async Task<IEnumerable<UserAccount>> GetUserAccounts()
         {
-            var client = await GetFtpClient();
-
-            var homeListing = await client.GetListingAsync(Constants.AccountsFolderPath);
+            var homeListing = await _ftpClient?.GetListingAsync(Constants.AccountsFolderPath);
             var accountHashIds = homeListing.Where(x => x.Type == FtpFileSystemObjectType.Directory).Select(x => x.Name).ToList();
             return accountHashIds.Select(x => new UserAccount(x));
         }
 
-        public async Task<Uri?> DownloadAppDb()
+        public async Task<Uri?> DownloadAppDb(string consoleIp)
         {
-            var client = await GetFtpClient();
+            var client = await CreateFtpClient(consoleIp);
+
             var status = await client.DownloadFileAsync($"{ClientConfig.TempDirectory.LocalPath}/{Constants.AppDbFileName}", Constants.MmsFolderPath + Constants.AppDbFileName);
 
             if (status == FtpStatus.Success)
@@ -39,9 +38,8 @@ namespace OrbisDbTools.PS4.Discovery
                 return FtpStatus.Skipped;
             }
 
-            var client = await GetFtpClient();
             using var stream = new FileStream(appDbPath.LocalPath, FileMode.Open);
-            return await client.UploadFileAsync(appDbPath.LocalPath, Constants.MmsFolderPath + Constants.AppDbFileName, FtpRemoteExists.Overwrite);
+            return await _ftpClient?.UploadFileAsync(appDbPath.LocalPath, Constants.MmsFolderPath + Constants.AppDbFileName, FtpRemoteExists.Overwrite);
         }
 
         public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSize(IEnumerable<AppTitle> titles)
@@ -75,39 +73,43 @@ namespace OrbisDbTools.PS4.Discovery
             var contentTypeStr = contentType.ToString().ToLower();
             var contentDataPath = $"/user/{contentTypeStr}/{titleId}/{contentTypeStr}.pkg";
 
-            var client = await GetFtpClient();
-
-            var pkgInfo = await client.GetObjectInfoAsync(contentDataPath);
+            var pkgInfo = await _ftpClient?.GetObjectInfoAsync(contentDataPath);
             return (pkgInfo is null || pkgInfo.Size == 0) ? null : new ContentSizeDto(titleId, pkgInfo.Size);
         }
 
         private async Task<ContentSizeDto?> CalculateDlcContentSize(string titleId)
         {
             var dlcDataPath = $"/user/addcont/{titleId}/";
-            var client = await GetFtpClient();
-
-            var exists = await client.DirectoryExistsAsync(dlcDataPath);
+            var exists = await _ftpClient?.DirectoryExistsAsync(dlcDataPath);
 
             if (!exists)
             {
                 return null;
             }
 
-            var listing = await client.GetListingAsync(dlcDataPath, FtpListOption.Recursive);
+            var listing = await _ftpClient?.GetListingAsync(dlcDataPath, FtpListOption.Recursive);
             var contentPkgs = listing.Where(x => x.Name.Contains("ac.pkg"));
             var dlcsTotalSize = contentPkgs.Sum(x => x.Size);
 
             return new ContentSizeDto(titleId, dlcsTotalSize);
         }
 
-        private async Task<IFtpClient> GetFtpClient()
+        private async Task<IFtpClient> CreateFtpClient(string ipAddress)
         {
-            if (_ftpClient?.IsConnected != true)
+            var parts = ipAddress.Split(':');
+
+            var ip = parts.FirstOrDefault();
+            var portString = parts.Length > 1 ? parts[1] : string.Empty;
+
+            var isPort = int.TryParse(portString, out var port);
+
+            if (!isPort)
             {
-                _ftpClient = new FtpClient("192.168.0.194", 2121, new());
-                await _ftpClient.ConnectAsync();
+                port = 2121;
             }
 
+            _ftpClient = new FtpClient(ip, port, new());
+            await _ftpClient.ConnectAsync();
             return _ftpClient;
         }
 

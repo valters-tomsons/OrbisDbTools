@@ -13,7 +13,7 @@ namespace OrbisDbTools.Avalonia.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    public ReactiveCommand<Unit, Unit> DownloadDb { get; }
+    public ReactiveCommand<Unit, Unit> ConnectDb { get; }
     public ReactiveCommand<Unit, Unit> RecalculateDbContent { get; }
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
@@ -26,12 +26,15 @@ public class MainWindowViewModel : ViewModelBase
     public bool EnableDbActions { get => enabledbactions; set => this.RaiseAndSetIfChanged(ref enabledbactions, value); }
     private bool enabledbactions;
 
+    public string ConsoleIpAddress { get => consoleIpAddress; set => this.RaiseAndSetIfChanged(ref consoleIpAddress, value); }
+    private string consoleIpAddress = string.Empty;
+
     public MainWindowViewModel()
     {
         _dbProvider = new AppDbProvider();
         _discovery = new DiscoveryService();
 
-        DownloadDb = ReactiveCommand.CreateFromTask(DownloadDatabase);
+        ConnectDb = ReactiveCommand.CreateFromTask(DownloadDatabase);
         RecalculateDbContent = ReactiveCommand.CreateFromTask(RecalculateContent);
         AllowDeleteApps = ReactiveCommand.CreateFromTask(MarkCanRemoveInstalled);
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
@@ -47,11 +50,15 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task DownloadDatabase()
     {
-        _localAppDb = await _discovery.DownloadAppDb();
-        if (_localAppDb is not null)
+        if (!string.IsNullOrWhiteSpace(consoleIpAddress))
         {
-            File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
-            EnableDbActions = await _dbProvider.OpenDatabase(_localAppDb.LocalPath);
+            _localAppDb = await _discovery.DownloadAppDb(consoleIpAddress);
+
+            if (_localAppDb is not null)
+            {
+                File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+                EnableDbActions = await _dbProvider.OpenDatabase(_localAppDb.LocalPath);
+            }
         }
     }
 
