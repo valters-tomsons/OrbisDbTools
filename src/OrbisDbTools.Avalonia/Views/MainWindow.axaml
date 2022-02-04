@@ -18,14 +18,14 @@
     <Grid>
         <Image Source="/Assets/GamingBackground.png" />
 
-        <Grid IsVisible="{Binding !EnableDbActions}" Name="PsConnection" HorizontalAlignment="Center" >
+        <Grid IsVisible="{Binding !DbConnected}" Name="PsConnection" HorizontalAlignment="Center" >
             <TextBlock 
                 Margin="100" Text="Connect to your system" 
                 FontSize="48" FontFamily="SF Pro Display" VerticalAlignment="Top"/>
 
             <TextBlock 
                 Text="Please enable FTP server on your PlayStation®4, then enter IP address of your console below." 
-                FontSize="16" FontFamily="SF Pro Display" VerticalAlignment="Center"
+                FontSize="16" FontFamily="SF Pro Display" VerticalAlignment="Center" TabIndex="0"
                 MaxWidth="350" TextWrapping="Wrap" TextAlignment="Center" Margin="0, 0, 0, 60"/>
 
             <TextBox 
@@ -33,19 +33,30 @@
                 VerticalAlignment="Center" Margin="0, 80, 0, 0" Watermark="192.168.[*].[*]:2121"
                 Text="{Binding ConsoleIpAddress}"/>
 
-            <Button 
+            <Button
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 100" 
                 Content="CONNECT" Foreground="#bb86fc" FontFamily="SF Pro Display" FontSize="20"
-                Command="{Binding ConnectDb}"/>
+                Command="{Binding ConnectDb}" TabIndex="1"/>
+            
+            <TextBlock
+                 FontFamily="SF Pro Display" FontSize="16" Text="{Binding ConnectionError}"
+                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 170" Foreground="Pink" />
         </Grid>
 
-        <StackPanel IsVisible="{Binding EnableDbActions}" Name="AppDbActions" Orientation="Vertical" VerticalAlignment="Center" Margin="15">
-            <Button Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
-            <Button Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
-            <Button Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
-
-            <Button Command="{Binding ForceDc}">Force DB Disconnect</Button>
+        <StackPanel IsVisible="{Binding DbConnected}" Name="AppDbActions" Orientation="Vertical" VerticalAlignment="Center" Margin="15">
+            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
+            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
+            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
+            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding ForceDc}">Close Database</Button>
         </StackPanel>
+
+        <Grid VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding ShowProgressBar}">
+            <Rectangle Fill="Black" Opacity="0.9" Width="600" Height="150" />
+            <StackPanel VerticalAlignment="Center" Orientation="Vertical">
+                <TextBlock Margin="15" TextAlignment="Center" FontFamily="SF Pro Display" FontSize="18" Text="{Binding ProgressText}" />
+                <ProgressBar Margin="15" IsIndeterminate="True"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 
 </Window>
