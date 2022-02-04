@@ -20,6 +20,10 @@ public class AppDbProvider : IAsyncDisposable
         _connectionFactory = new ConnectionFactory();
     }
 
+    /// <summary>
+    /// Opens a connection to a local database file
+    /// </summary>
+    /// <param name="dbPath">Local path to SQLite database</param>
     public async Task<bool> OpenDatabase(string dbPath)
     {
         _dbConnection = await _connectionFactory.OpenConnection(dbPath);

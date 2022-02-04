@@ -1,16 +1,18 @@
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Microsoft.Data.Sqlite;
+using OrbisDbTools.Avalonia.ViewModels;
 
 namespace OrbisDbTools.Avalonia.Views
 {
-    public partial class MainWindow : Window
+    public class MainWindow : Window
     {
-        public MainWindow()
+        public MainWindow() { }
+
+        public MainWindow(MainWindowViewModel viewModel)
         {
             InitializeComponent();
+            DataContext = viewModel;
 #if DEBUG
             this.AttachDevTools();
 #endif
