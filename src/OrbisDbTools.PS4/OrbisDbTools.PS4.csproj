@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OrbisDbTools.Utils\OrbisDbTools.Utils.csproj" />
+    <ProjectReference Include="..\OrbisDbTools.Lib\OrbisDbTools.Lib.csproj" />
   </ItemGroup>
 
 </Project>
