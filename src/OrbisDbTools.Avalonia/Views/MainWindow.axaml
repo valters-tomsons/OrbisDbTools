@@ -3,7 +3,9 @@
         xmlns:vm="using:OrbisDbTools.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="920" d:DesignHeight="600"
+        MinWidth="920" MinHeight="600"
+        MaxWidth="920" MaxHeight="600"
         x:Class="OrbisDbTools.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="OrbisDbTools.Avalonia">
@@ -12,12 +14,15 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15">
-        <Button Command="{Binding DownloadDb}">Download PS4 database</Button>
-        <Button Command="{Binding RecalculateDbContent}" IsEnabled="{Binding EnableDbActions}">Recalculate content size</Button>
-        <Button Command="{Binding AllowDeleteApps}" IsEnabled="{Binding EnableDbActions}">Allow delete installed content</Button>
-        <Button Command="{Binding HidePsnApps}" IsEnabled="{Binding EnableDbActions}">Hide PSN Apps</Button>
-        <Button Command="{Binding ForceDc}">Force Disconnect</Button>
-    </StackPanel>
+    <Grid>
+        <Image Source="/Assets/GamingBackground.png" />
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15">
+            <Button Command="{Binding DownloadDb}">Download PS4 database</Button>
+            <Button Command="{Binding RecalculateDbContent}" IsEnabled="{Binding EnableDbActions}">Recalculate content size</Button>
+            <Button Command="{Binding AllowDeleteApps}" IsEnabled="{Binding EnableDbActions}">Allow delete installed content</Button>
+            <Button Command="{Binding HidePsnApps}" IsEnabled="{Binding EnableDbActions}">Hide PSN Apps</Button>
+            <Button Command="{Binding ForceDc}">Force Disconnect</Button>
+        </StackPanel>
+    </Grid>
 
 </Window>
