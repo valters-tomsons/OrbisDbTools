@@ -20,11 +20,11 @@ jobs:
     - name: Restore linux-x64
       run: dotnet restore -r linux-x64
     - name: Publish linux-x64
-      run: dotnet publish -c Release -r linux-x64 -o release-linux
+      run: dotnet publish -c Release --self-contained -r linux-x64 -o release-linux
     - name: Archive linux-x64 build
       uses: ihiroky/archive-action@v1
       with:
-        root_dir: release-linux/
+        root_dir: release-linux
         file_path: OrbisDbTools-linux-${GITHUB_SHA::8}.tar.xz
     - name: Upload artifact
       uses: actions/upload-artifact@v2.3.1
