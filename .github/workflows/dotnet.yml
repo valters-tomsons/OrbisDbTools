@@ -25,8 +25,8 @@ jobs:
       uses: ihiroky/archive-action@v1
       with:
         root_dir: release-linux
-        file_path: OrbisDbTools-linux-${GITHUB_SHA::8}.tar.xz
+        file_path: OrbisDbTools_linux_${{ GITHUB_SHA::8 }}.tar.xz
     - name: Upload artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-        path: OrbisDbTools-linux-${GITHUB_SHA::8}.tar.xz
+        path: OrbisDbTools_linux_${{ GITHUB_SHA::8 }}.tar.xz
