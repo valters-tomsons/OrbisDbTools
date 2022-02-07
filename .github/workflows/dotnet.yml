@@ -20,7 +20,7 @@ jobs:
     - name: Restore linux-x64
       run: dotnet restore -r linux-x64
     - name: Build linux-x64
-      run: dotnet build -c Release --no-restore
+      run: dotnet build -c Release -r linux-64 --no-restore
     - name: Publish linux-x64
       run: dotnet publish -c Release -r linux-x64 -o release-linux
     - name: Archive linux-x64 build
