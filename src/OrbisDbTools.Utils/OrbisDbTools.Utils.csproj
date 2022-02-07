@@ -7,6 +7,12 @@
     <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>None</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentFTP" Version="36.1.0" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.1" />
