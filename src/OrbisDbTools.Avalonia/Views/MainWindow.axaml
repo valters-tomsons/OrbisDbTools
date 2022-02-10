@@ -3,9 +3,9 @@
         xmlns:vm="using:OrbisDbTools.Avalonia.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="920" d:DesignHeight="600"
-        MinWidth="920" MinHeight="600"
-        MaxWidth="920" MaxHeight="600"
+        mc:Ignorable="d" d:DesignWidth="1020" d:DesignHeight="600"
+        MinWidth="1020" MinHeight="600"
+        MaxWidth="1020" MaxHeight="600"
         WindowStartupLocation="CenterScreen"
         x:Class="OrbisDbTools.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
@@ -16,8 +16,7 @@
     </Design.DataContext>
 
     <Grid>
-        <Image Source="/Assets/GamingBackground.png" />
-
+        <Image Source="/Assets/GamingBackground.png" Stretch="Fill" />
         <Grid IsVisible="{Binding !DbConnected}" Name="PsConnection" HorizontalAlignment="Center" >
             <TextBlock 
                 Margin="100" Text="Connect to your system" 
@@ -37,20 +36,29 @@
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 100" 
                 Content="CONNECT" Foreground="#bb86fc" FontFamily="SF Pro Display" FontSize="20"
                 Command="{Binding ConnectDb}" TabIndex="1"/>
-            
+
             <TextBlock
                  FontFamily="SF Pro Display" FontSize="16" Text="{Binding ConnectionError}"
                  VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 170" Foreground="Pink" />
         </Grid>
+        <Grid IsVisible="{Binding DbConnected}" ColumnDefinitions="Auto,*">
+            <StackPanel  Grid.Column="0" Name="AppDbActions" Orientation="Vertical" Margin="10">
+                <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
+                <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
+                <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
+                <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding ForceDc}">Close Database</Button>
+            </StackPanel>
+            <DataGrid Grid.Column="1" AutoGenerateColumns="False" Items="{Binding DbItems}" CanUserResizeColumns="True" CornerRadius="10">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Title ID" Binding="{Binding TitleId}"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
+                    <DataGridTextColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
+                    <DataGridTextColumn Header="Size (bytes)" Binding="{Binding ContentSize}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
-        <StackPanel IsVisible="{Binding DbConnected}" Name="AppDbActions" Orientation="Vertical" VerticalAlignment="Center" Margin="15">
-            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
-            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
-            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
-            <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding ForceDc}">Close Database</Button>
-        </StackPanel>
-
-        <Grid VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding ShowProgressBar}">
+        <Grid HorizontalAlignment="Center" IsVisible="{Binding ShowProgressBar}">
             <Rectangle Fill="Black" Opacity="0.9" Width="600" Height="150" />
             <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                 <TextBlock Margin="15" TextAlignment="Center" FontFamily="SF Pro Display" FontSize="18" Text="{Binding ProgressText}" />

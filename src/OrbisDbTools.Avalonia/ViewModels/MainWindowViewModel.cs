@@ -2,7 +2,9 @@
 using System.Reactive;
 using System.Threading.Tasks;
 using OrbisDbTools.PS4.AppDb;
+using OrbisDbTools.PS4.Models;
 using ReactiveUI;
+using System.Collections.ObjectModel;
 
 namespace OrbisDbTools.Avalonia.ViewModels;
 
@@ -31,6 +33,9 @@ public class MainWindowViewModel : ViewModelBase
     public string ConnectionError { get => connectionError; set => this.RaiseAndSetIfChanged(ref connectionError, value); }
     private string connectionError = string.Empty;
 
+    public ObservableCollection<AppTitle> DbItems { get => dbItems; set => this.RaiseAndSetIfChanged(ref dbItems, value); }
+    private ObservableCollection<AppTitle> dbItems = new();
+
     public MainWindowViewModel(AppDbController controller)
     {
         _controller = controller;
@@ -40,6 +45,12 @@ public class MainWindowViewModel : ViewModelBase
         AllowDeleteApps = ReactiveCommand.CreateFromTask(MarkCanRemoveInstalled);
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
         ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
+    }
+
+    async Task UpdateDbItems()
+    {
+        var items = await _controller.QueryInstalledApps();
+        DbItems = new(items);
     }
 
     async Task ForceDisconnect()
@@ -58,6 +69,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             DbConnected = await _controller.DownloadAndConnect(consoleIpAddress).ConfigureAwait(false);
+            await UpdateDbItems();
         }
         catch (Exception e)
         {
@@ -69,19 +81,26 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task HidePSNApps()
     {
+        ShowSpinner("Looking for PSN apps, please wait...");
         await _controller.HideAllKnownPsnApps();
+        await UpdateDbItems();
+        ShowProgressBar = false;
     }
 
     async Task RecalculateContent()
     {
         ShowSpinner("Calculating, please wait...");
         await _controller.ReCalculateInstalledAppSizes();
+        await UpdateDbItems();
         ShowProgressBar = false;
     }
 
     async Task MarkCanRemoveInstalled()
     {
+        ShowSpinner("Allowing deletion, please wait...");
         await _controller.AllowDeleteInstalledApps();
+        await UpdateDbItems();
+        ShowProgressBar = false;
     }
 
     private void ShowSpinner(string text)

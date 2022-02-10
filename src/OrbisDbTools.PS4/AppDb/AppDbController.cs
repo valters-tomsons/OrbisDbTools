@@ -1,4 +1,5 @@
 using OrbisDbTools.PS4.Discovery;
+using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 
 namespace OrbisDbTools.PS4.AppDb
@@ -37,6 +38,26 @@ namespace OrbisDbTools.PS4.AppDb
             await _dbProvider.DisposeAsync();
             await _discovery.DisposeAsync();
             Console.WriteLine("Finished disconnect");
+        }
+
+        public async Task<IList<AppTitle>> QueryInstalledApps()
+        {
+            var appTables = await _dbProvider.GetAppTables();
+
+            if (!appTables.Any())
+            {
+                return Array.Empty<AppTitle>();
+            }
+
+            var titles = await _dbProvider
+                .GetInstalledTitles(appTables.First());
+
+            if (titles is null)
+            {
+                return Array.Empty<AppTitle>();
+            }
+
+            return titles.ToList();
         }
 
         public async Task<int> HideAllKnownPsnApps()
