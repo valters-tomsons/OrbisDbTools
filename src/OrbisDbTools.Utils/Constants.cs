@@ -11,4 +11,5 @@ public struct Constants
 
     public const string AccountsFolderPath = "/system_data/priv/home/";
     public const string AccountConfigFileName = "config.dat";
+    public const string ExternalDriveMountPoint0 = "/mnt/ext0";
 }

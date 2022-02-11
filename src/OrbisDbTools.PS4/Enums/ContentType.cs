@@ -4,5 +4,5 @@ public enum ContentType
 {
     App,
     Patch,
-    AddCont
+    AddCont // DLC
 }

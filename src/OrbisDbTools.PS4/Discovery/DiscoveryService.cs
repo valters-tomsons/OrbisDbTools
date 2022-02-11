@@ -49,9 +49,9 @@ namespace OrbisDbTools.PS4.Discovery
             {
                 var titleId = title.TitleId;
 
-                var appSize = await CalculateContentSize(ContentType.App, titleId);
-                var patchSize = await CalculateContentSize(ContentType.Patch, titleId);
-                var dlcSize = await CalculateContentSize(ContentType.AddCont, titleId);
+                var appSize = await CalculateContentSize(ContentType.App, title);
+                var patchSize = await CalculateContentSize(ContentType.Patch, title);
+                var dlcSize = await CalculateContentSize(ContentType.AddCont, title);
 
                 if (appSize is not null)
                 {
@@ -63,25 +63,34 @@ namespace OrbisDbTools.PS4.Discovery
             return result;
         }
 
-        private async Task<ContentSizeDto?> CalculateContentSize(ContentType contentType, string titleId)
+        private async Task<ContentSizeDto?> CalculateContentSize(ContentType contentType, AppTitle title)
         {
             if (contentType == ContentType.AddCont)
             {
-                return await CalculateDlcContentSize(titleId);
+                return await CalculateDlcContentSize(title);
             }
 
             var contentTypeStr = contentType.ToString().ToLower();
-            var contentDataPath = $"/user/{contentTypeStr}/{titleId}/{contentTypeStr}.pkg";
+            var contentDataPath = $"/user/{contentTypeStr}/{title.TitleId}/{contentTypeStr}.pkg";
+
+            if (title.ExternalStorage)
+            {
+                contentDataPath = Constants.ExternalDriveMountPoint0 + contentDataPath;
+            }
 
             var pkgInfo = await _ftpClient?.GetObjectInfoAsync(contentDataPath);
-            return (pkgInfo is null || pkgInfo.Size == 0) ? null : new ContentSizeDto(titleId, pkgInfo.Size);
+            return (pkgInfo is null || pkgInfo.Size == 0) ? null : new ContentSizeDto(title.TitleId, pkgInfo.Size);
         }
 
-        private async Task<ContentSizeDto?> CalculateDlcContentSize(string titleId)
+        private async Task<ContentSizeDto?> CalculateDlcContentSize(AppTitle title)
         {
-            var dlcDataPath = $"/user/addcont/{titleId}/";
-            var exists = await _ftpClient?.DirectoryExistsAsync(dlcDataPath);
+            var dlcDataPath = $"/user/addcont/{title.TitleId}/";
+            if (title.ExternalStorage)
+            {
+                dlcDataPath = Constants.ExternalDriveMountPoint0 + dlcDataPath;
+            }
 
+            var exists = await _ftpClient?.DirectoryExistsAsync(dlcDataPath);
             if (!exists)
             {
                 return null;
@@ -91,7 +100,7 @@ namespace OrbisDbTools.PS4.Discovery
             var contentPkgs = listing.Where(x => x.Name.Contains("ac.pkg"));
             var dlcsTotalSize = contentPkgs.Sum(x => x.Size);
 
-            return new ContentSizeDto(titleId, dlcsTotalSize);
+            return new ContentSizeDto(title.TitleId, dlcsTotalSize);
         }
 
         private async Task<IFtpClient> CreateFtpClient(string ipAddress)
