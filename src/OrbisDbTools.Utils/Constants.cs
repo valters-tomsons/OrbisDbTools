@@ -7,6 +7,7 @@ public struct Constants
     public const string TblAppBrowse = "tbl_appbrowse";
 
     public const string UserAppMetadataPath = "/user/appmeta/";
+    public const string UserExternalAppMetadata = $"{UserAppMetadataPath}external/";
 
     public const string AccountsFolderPath = "/system_data/priv/home/";
     public const string AccountConfigFileName = "config.dat";

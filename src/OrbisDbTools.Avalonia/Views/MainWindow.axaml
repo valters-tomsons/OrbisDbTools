@@ -48,12 +48,13 @@
                 <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
                 <Button IsEnabled="{Binding !ShowProgressBar}" Command="{Binding ForceDc}">Close Database</Button>
             </StackPanel>
-            <DataGrid Grid.Column="1" AutoGenerateColumns="False" Items="{Binding DbItems}" CanUserResizeColumns="True" CornerRadius="10">
+            <DataGrid Grid.Column="1" IsReadOnly="True" AutoGenerateColumns="False" Items="{Binding DbItems}" CanUserResizeColumns="True" CornerRadius="10">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Title ID" Binding="{Binding TitleId}"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
                     <DataGridTextColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
                     <DataGridTextColumn Header="Size (bytes)" Binding="{Binding ContentSize}"/>
+                    <DataGridTextColumn Header="External Storage" Binding="{Binding ExternalStorage}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

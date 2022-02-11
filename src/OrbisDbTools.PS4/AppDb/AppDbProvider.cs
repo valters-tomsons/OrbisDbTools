@@ -44,7 +44,7 @@ public class AppDbProvider : IAsyncDisposable
             return Enumerable.Empty<AppTitle>();
         }
 
-        var installedAppsSql = $@"SELECT titleId, titleName, contentId, contentSize, visible, canRemove
+        var installedAppsSql = $@"SELECT titleId, titleName, contentId, contentSize, visible, canRemove, metaDataPath
                                 from {appTable}
                                 where contentId not NULL and metaDataPath like '{Constants.UserAppMetadataPath}%'";
 
