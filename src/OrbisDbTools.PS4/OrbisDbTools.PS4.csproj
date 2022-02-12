@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\OrbisDbTools.Utils\OrbisDbTools.Utils.csproj" />
     <ProjectReference Include="..\OrbisDbTools.Lib\OrbisDbTools.Lib.csproj" />
+    <ProjectReference Include="..\..\external\LibOrbisPkg\LibOrbisPkg.Core\LibOrbisPkg.Core.csproj" />
   </ItemGroup>
 
 </Project>
