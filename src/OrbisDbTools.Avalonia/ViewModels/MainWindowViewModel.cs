@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reactive;
 using System.Threading.Tasks;
 using OrbisDbTools.PS4.AppDb;
@@ -76,7 +76,7 @@ public class MainWindowViewModel : ViewModelBase
             ConnectionError = $"Failed to connect: {e.Message}";
         }
 
-        ShowProgressBar = false;
+        HideSpinner();
     }
 
     async Task HidePSNApps()
@@ -84,7 +84,7 @@ public class MainWindowViewModel : ViewModelBase
         ShowSpinner("Looking for PSN apps, please wait...");
         await _controller.HideAllKnownPsnApps();
         await UpdateDbItems();
-        ShowProgressBar = false;
+        HideSpinner();
     }
 
     async Task RecalculateContent()
@@ -92,7 +92,7 @@ public class MainWindowViewModel : ViewModelBase
         ShowSpinner("Calculating, please wait...");
         await _controller.ReCalculateInstalledAppSizes();
         await UpdateDbItems();
-        ShowProgressBar = false;
+        HideSpinner();
     }
 
     async Task MarkCanRemoveInstalled()
@@ -100,7 +100,7 @@ public class MainWindowViewModel : ViewModelBase
         ShowSpinner("Allowing deletion, please wait...");
         await _controller.AllowDeleteInstalledApps();
         await UpdateDbItems();
-        ShowProgressBar = false;
+        HideSpinner();
     }
 
     private void ShowSpinner(string text)
@@ -113,5 +113,10 @@ public class MainWindowViewModel : ViewModelBase
         ProgressText = text;
         ConnectionError = string.Empty;
         ShowProgressBar = true;
+    }
+
+    private void HideSpinner()
+    {
+        ShowProgressBar = false;
     }
 }
