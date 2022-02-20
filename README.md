@@ -8,6 +8,8 @@ OrbisDbTools is a free cross-platform application for interacting with hacked `P
 * Allow to delete user all installed applications
 * Hide apps that require PSN ([listed here](https://github.com/valters-tomsons/OrbisDbTools/blob/main/src/OrbisDbTools.PS4/KnownContent.cs#L22))
 
+This tool will also automatically backup your `app.db` file to `$TMPDIR/app.db.$TIMESTAMP` when connecting via network. Local database files are backed up in file directory with `.$TIMESTAMP` appended to filename.
+
 ## Usage
 
 * Download latest release from `Releases` section
