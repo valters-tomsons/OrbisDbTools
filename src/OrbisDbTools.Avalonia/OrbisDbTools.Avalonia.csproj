@@ -11,10 +11,14 @@
     <DebugSymbols>false</DebugSymbols>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(OS)' == 'UNIX'">
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'linux-x64'">
+    <OutputType>Exe</OutputType>
+    <PublishTrimmed>true</PublishTrimmed>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'osx-x64'">
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' == 'win-x64'">
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
   <ItemGroup>
@@ -24,10 +28,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.3.0" />
-    <PackageReference Include="Avalonia" Version="0.10.11" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.11" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.11" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.11" />
+    <PackageReference Include="Avalonia" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.12" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.12" />
   </ItemGroup>
 
   <ItemGroup>
