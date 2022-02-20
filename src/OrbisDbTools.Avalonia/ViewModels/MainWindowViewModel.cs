@@ -41,7 +41,8 @@ public class MainWindowViewModel : ViewModelBase
     public ObservableCollection<AppTitle> DbItems { get => dbItems; set => this.RaiseAndSetIfChanged(ref dbItems, value); }
     private ObservableCollection<AppTitle> dbItems = new();
 
-    public Func<Task<Uri?>>? OpenFileDialogAction;
+    public Func<Task<Uri?>>? OpenLocalDbDialogAction;
+    public Func<Task<Uri?>>? SaveDbLocallyDialogAction;
 
     public MainWindowViewModel(AppDbController controller)
     {
@@ -59,7 +60,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            DbConnected = await _controller.PrompAndOpenLocalDatabase(OpenFileDialogAction).ConfigureAwait(true);
+            DbConnected = await _controller.PrompAndOpenLocalDatabase(OpenLocalDbDialogAction).ConfigureAwait(true);
             if (DbConnected)
             {
                 await UpdateDbItems();
@@ -81,7 +82,15 @@ public class MainWindowViewModel : ViewModelBase
     async Task ForceDisconnect()
     {
         ShowSpinner("Disconnecting, please wait...");
-        await _controller.DisconnectRemote();
+
+        if (IsLocalDb)
+        {
+            await _controller.CloseLocalDb();
+        }
+        else
+        {
+            await _controller.DisconnectRemoteAndPromptSave(SaveDbLocallyDialogAction).ConfigureAwait(true);
+        }
 
         DbConnected = false;
         ShowProgressBar = false;

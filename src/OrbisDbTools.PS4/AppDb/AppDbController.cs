@@ -53,7 +53,19 @@ namespace OrbisDbTools.PS4.AppDb
             return false;
         }
 
-        public async Task DisconnectRemote()
+        public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
+        {
+            await _discovery.DisposeAsync();
+            await _dbProvider.DisposeAsync();
+
+            var targetPath = await fileDialogAction().ConfigureAwait(true);
+            if (targetPath is not null)
+            {
+                File.Copy($"{ClientConfig.TempDirectory.LocalPath}/app.db", targetPath.LocalPath);
+            }
+        }
+
+        public async Task CloseLocalDb()
         {
             await _dbProvider.DisposeAsync();
             await _discovery.DisposeAsync();

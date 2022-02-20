@@ -17,7 +17,8 @@ namespace OrbisDbTools.Avalonia.Views
         {
             InitializeComponent();
 
-            viewModel.OpenFileDialogAction = new Func<Task<Uri?>>(ShowFileBrowserDialogWindow);
+            viewModel.OpenLocalDbDialogAction = new Func<Task<Uri?>>(ShowFileBrowserDialogWindow);
+            viewModel.SaveDbLocallyDialogAction = new Func<Task<Uri?>>(ShowSaveFileDialogWindow);
 
             DataContext = viewModel;
         }
@@ -31,7 +32,7 @@ namespace OrbisDbTools.Avalonia.Views
         {
             var dialog = new OpenFileDialog
             {
-                Title = "Browse for local database...",
+                Title = "Select app.db file that you recently dumped from your PS4",
                 Filters = new List<FileDialogFilter>() {
                     new FileDialogFilter() { Name = "Database files (.db)", Extensions = new List<string>() { "db*" } },
                     new FileDialogFilter() { Name = "All files", Extensions = new List<string>() { "*" } },
@@ -48,6 +49,34 @@ namespace OrbisDbTools.Avalonia.Views
             }
 
             return null;
+        }
+
+        public async Task<Uri?> ShowSaveFileDialogWindow()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = "Save the modified app.db file locally",
+                InitialFileName = "app",
+                DefaultExtension = ".db",
+                Filters = new List<FileDialogFilter>()
+                {
+                    new FileDialogFilter() { Name = "SQLite database (.db)", Extensions = new List<string>() { "db" } },
+                }
+            };
+
+            var result = await dialog.ShowAsync(this).ConfigureAwait(true);
+
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                return null;
+            }
+
+            if (File.Exists(result))
+            {
+                throw new Exception("Selected file already exists");
+            }
+
+            return new(result, UriKind.Absolute);
         }
     }
 }
