@@ -19,14 +19,43 @@ jobs:
         dotnet-version: 6.0.x
     - name: Nuget Restore
       run: dotnet restore
+      
     - name: Publish linux-x64
       run: dotnet publish -c Release --self-contained -r linux-x64 -o release-linux
+    - name: Publish win-x64
+      run: dotnet publish -c Release --self-contained -r win-x64 -o release-linux
+    - name: Publish osx-x64
+      run: dotnet publish -c Release --self-contained -r osx-x64 -o release-linux
+
     - name: Archive linux-x64 build
       uses: ihiroky/archive-action@v1
       with:
         root_dir: release-linux
         file_path: OrbisDbTools_linux.tar.xz
-    - name: Upload artifact
+
+    - name: Archive win64-x64 build
+      uses: ihiroky/archive-action@v1
+      with:
+        root_dir: release-win64
+        file_path: OrbisDbTools_win64.tar.xz
+
+    - name: Archive win64-x64 build
+      uses: ihiroky/archive-action@v1
+      with:
+        root_dir: release-osx_x64
+        file_path: OrbisDbTools_osx_x64.tar.xz
+
+    - name: Upload linux-x64
       uses: actions/upload-artifact@v2.3.1
       with:
         path: OrbisDbTools_linux.tar.xz
+
+    - name: Upload win-x64
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        path: OrbisDbTools_win.tar.xz
+
+    - name: Upload osx-x64
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        path: OrbisDbTools_osx_x64.tar.xz
