@@ -12,10 +12,11 @@ This tool will also automatically backup your `app.db` file to `$TMPDIR/app.db.$
 
 ## Usage
 
-* Download latest release from `Releases` section
-* Extract archive
+* Download latest release from `Releases` section for your platform
+* Extract downloaded archive into a folder
 * Launch `OrbisDbTools.Avalonia` executable
 * After patching, upload resulting `app.db` to your PS4 at `/system_data/priv/mms/app.db`
+* Launch internet browser on your PS4, then go back to system menu to see your changes
 
 ## Screenshots
 
