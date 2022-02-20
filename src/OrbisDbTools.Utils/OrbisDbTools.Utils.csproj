@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentFTP" Version="36.1.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.1" />
+    <PackageReference Include="FluentFTP" Version="37.0.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.2" />
     <PackageReference Include="Dapper" Version="2.0.123" />
   </ItemGroup>
 
