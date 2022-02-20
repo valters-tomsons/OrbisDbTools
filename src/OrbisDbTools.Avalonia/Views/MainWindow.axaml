@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterScreen"
         x:Class="OrbisDbTools.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="OrbisDbTools.Avalonia">
+        Title="OrbisDbTools">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
