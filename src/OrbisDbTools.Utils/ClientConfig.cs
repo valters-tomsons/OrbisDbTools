@@ -1,28 +1,20 @@
-using System.Runtime.InteropServices;
 namespace OrbisDbTools.Utils;
 
 public static class ClientConfig
 {
     public static Uri TempDirectory { get; }
 
-    private const string ToolsFolderName = "orbisdbtools";
+    private const string ToolsFolderName = "OrbisDbTools";
+    private const string DefaultTmpPath = "/tmp/";
 
     static ClientConfig()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        var tmpdir = Path.GetTempPath() ?? DefaultTmpPath;
+        if (string.IsNullOrWhiteSpace(tmpdir))
         {
-            var tmpdir = Environment.GetEnvironmentVariable("%Temp%");
-            TempDirectory = new($"{tmpdir}/{ToolsFolderName}");
+            tmpdir = DefaultTmpPath;
         }
-        else
-        {
-            var tmpdir = Environment.GetEnvironmentVariable("TMPDIR");
-            if (!string.IsNullOrWhiteSpace(tmpdir))
-            {
-                TempDirectory = new($"{tmpdir}/{ToolsFolderName}");
-            }
 
-            TempDirectory = new($"/tmp/{ToolsFolderName}");
-        }
+        TempDirectory = new(Path.Combine(tmpdir, ToolsFolderName));
     }
 }
