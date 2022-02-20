@@ -49,7 +49,7 @@
         </Grid>
 
         <Grid IsVisible="{Binding DbConnected}" ColumnDefinitions="Auto,*">
-            <StackPanel IsVisible="{Binding !ShowProgressBar}" Grid.Column="0" Name="AppDbActions" Orientation="Vertical" Margin="10">
+            <StackPanel Spacing="10" VerticalAlignment="Center" IsVisible="{Binding !ShowProgressBar}" Grid.Column="0" Name="AppDbActions" Orientation="Vertical" Margin="10">
                 <Button IsEnabled="{Binding !IsLocalDb}" Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
                 <Button Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
                 <Button Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
