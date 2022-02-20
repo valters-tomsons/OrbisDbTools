@@ -1,3 +1,4 @@
+using System.Net;
 using OrbisDbTools.PS4.Discovery;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
@@ -17,8 +18,24 @@ namespace OrbisDbTools.PS4.AppDb
             _dbProvider = dbProvider;
         }
 
+        public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogAction)
+        {
+            var localPath = await fileDialogAction().ConfigureAwait(true);
+            if (localPath is not null)
+            {
+                return await _dbProvider.OpenDatabase(localPath.LocalPath).ConfigureAwait(true);
+            }
+
+            return false;
+        }
+
         public async Task<bool> DownloadAndConnect(string consoleIp)
         {
+            if (!IPAddress.TryParse(consoleIp, out var _))
+            {
+                throw new Exception("Not a valid IP address");
+            }
+
             if (!string.IsNullOrWhiteSpace(consoleIp))
             {
                 _localAppDb = await _discovery.DownloadAppDb(consoleIp);
@@ -33,7 +50,7 @@ namespace OrbisDbTools.PS4.AppDb
             return false;
         }
 
-        public async Task DisconnectFromConsole()
+        public async Task DisconnectRemote()
         {
             await _dbProvider.DisposeAsync();
             await _discovery.DisposeAsync();
