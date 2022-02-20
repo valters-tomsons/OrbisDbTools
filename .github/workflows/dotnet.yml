@@ -23,9 +23,9 @@ jobs:
     - name: Publish linux-x64
       run: dotnet publish -c Release --self-contained -r linux-x64 -o release-linux
     - name: Publish win-x64
-      run: dotnet publish -c Release --self-contained -r win-x64 -o release-linux
+      run: dotnet publish -c Release --self-contained -r win-x64 -o release-win64
     - name: Publish osx-x64
-      run: dotnet publish -c Release --self-contained -r osx-x64 -o release-linux
+      run: dotnet publish -c Release --self-contained -r osx-x64 -o release-osx_x64
 
     - name: Archive linux-x64 build
       uses: ihiroky/archive-action@v1
@@ -39,7 +39,7 @@ jobs:
         root_dir: release-win64
         file_path: OrbisDbTools_win64.tar.xz
 
-    - name: Archive win64-x64 build
+    - name: Archive osx_x64 build
       uses: ihiroky/archive-action@v1
       with:
         root_dir: release-osx_x64
