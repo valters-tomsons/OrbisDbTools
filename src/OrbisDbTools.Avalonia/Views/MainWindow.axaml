@@ -53,7 +53,12 @@
                 <Button IsEnabled="{Binding !IsLocalDb}" Command="{Binding RecalculateDbContent}">Recalculate content size</Button>
                 <Button Command="{Binding AllowDeleteApps}">Allow delete installed content</Button>
                 <Button Command="{Binding HidePsnApps}">Hide PSN Apps</Button>
-                <Button Command="{Binding ForceDc}">Close Database</Button>
+                <Button Command="{Binding ForceDc}">
+                    <Grid>
+                        <TextBlock IsVisible="{Binding !IsLocalDb}" Text="Disconnect &amp; Save As"/>
+                        <TextBlock IsVisible="{Binding IsLocalDb}" Text="Close File"/>
+                    </Grid>
+                </Button>
             </StackPanel>
             <DataGrid IsVisible="{Binding !ShowProgressBar}" Grid.Column="1" IsReadOnly="True" AutoGenerateColumns="False" Items="{Binding DbItems}" CanUserResizeColumns="True" CornerRadius="10">
                 <DataGrid.Columns>
