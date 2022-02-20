@@ -20,10 +20,14 @@ namespace OrbisDbTools.PS4.AppDb
 
         public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogAction)
         {
-            var localPath = await fileDialogAction().ConfigureAwait(true);
-            if (localPath is not null)
+            _localAppDb = await fileDialogAction().ConfigureAwait(true);
+            if (_localAppDb is not null)
             {
-                return await _dbProvider.OpenDatabase(localPath.LocalPath).ConfigureAwait(true);
+                var fileDirectory = Path.GetDirectoryName(_localAppDb.LocalPath);
+                var fileName = Path.GetFileName(_localAppDb.LocalPath);
+
+                File.Copy(_localAppDb.LocalPath, $"{fileDirectory}/{fileName}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+                return await _dbProvider.OpenDatabase(_localAppDb.LocalPath).ConfigureAwait(true);
             }
 
             return false;
@@ -39,7 +43,6 @@ namespace OrbisDbTools.PS4.AppDb
             if (!string.IsNullOrWhiteSpace(consoleIp))
             {
                 _localAppDb = await _discovery.DownloadAppDb(consoleIp);
-
                 if (_localAppDb is not null)
                 {
                     File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
