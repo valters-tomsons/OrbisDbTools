@@ -61,7 +61,7 @@ namespace OrbisDbTools.PS4.AppDb
             var targetPath = await fileDialogAction().ConfigureAwait(true);
             if (targetPath is not null)
             {
-                File.Copy($"{ClientConfig.TempDirectory.LocalPath}/app.db", targetPath.LocalPath);
+                File.Copy($"{ClientConfig.TempDirectory.LocalPath}/app.db", targetPath.LocalPath, true);
             }
         }
 

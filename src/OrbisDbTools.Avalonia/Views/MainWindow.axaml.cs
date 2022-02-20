@@ -6,6 +6,9 @@ using Avalonia.Markup.Xaml;
 using OrbisDbTools.Avalonia.ViewModels;
 using System.Linq;
 using System.Collections.Generic;
+using MessageBox.Avalonia;
+using MessageBox.Avalonia.Enums;
+using MessageBox.Avalonia.DTO;
 
 namespace OrbisDbTools.Avalonia.Views
 {
@@ -53,7 +56,7 @@ namespace OrbisDbTools.Avalonia.Views
 
         public async Task<Uri?> ShowSaveFileDialogWindow()
         {
-            var dialog = new SaveFileDialog
+            var saveDialog = new SaveFileDialog
             {
                 Title = "Save the modified app.db file locally",
                 InitialFileName = "app",
@@ -64,19 +67,62 @@ namespace OrbisDbTools.Avalonia.Views
                 }
             };
 
-            var result = await dialog.ShowAsync(this).ConfigureAwait(true);
+            var resultFilePath = await saveDialog.ShowAsync(this).ConfigureAwait(true);
 
-            if (string.IsNullOrWhiteSpace(result))
+            if (string.IsNullOrWhiteSpace(resultFilePath))
             {
                 return null;
             }
 
-            if (File.Exists(result))
+            if (File.Exists(resultFilePath))
             {
-                throw new Exception("Selected file already exists");
+                return await PromptFileOverwrite(resultFilePath, saveDialog);
             }
 
-            return new(result, UriKind.Absolute);
+            return new(resultFilePath, UriKind.Absolute);
+        }
+
+        private async Task<Uri?> PromptFileOverwrite(string filePath, SaveFileDialog saveDialog)
+        {
+            // Yes, this is a bit cursed
+            // No, I don't care
+
+            while (true)
+            {
+                var overwritePrompt = MessageBoxManager.GetMessageBoxStandardWindow(new MessageBoxStandardParams
+                {
+                    ButtonDefinitions = ButtonEnum.OkCancel,
+                    ContentTitle = "Overwrite?",
+                    ContentMessage = $"File `{Path.GetFileName(filePath)}` already exists. Overwrite?",
+                    Icon = MessageBox.Avalonia.Enums.Icon.Warning,
+                    ShowInCenter = true,
+                });
+
+                var buttonResult = await overwritePrompt.ShowDialog(this);
+
+                if (buttonResult == ButtonResult.Ok)
+                {
+                    return new(filePath, UriKind.Absolute);
+                }
+                else if (buttonResult == ButtonResult.Cancel)
+                {
+                    var resultFilePath = await saveDialog.ShowAsync(this).ConfigureAwait(true);
+                    if (string.IsNullOrWhiteSpace(resultFilePath))
+                    {
+                        return null;
+                    }
+                    if (File.Exists(resultFilePath))
+                    {
+                        continue;
+                    }
+
+                    return new Uri(resultFilePath, UriKind.Absolute);
+                }
+                else if (buttonResult == ButtonResult.None)
+                {
+                    return null;
+                }
+            }
         }
     }
 }
