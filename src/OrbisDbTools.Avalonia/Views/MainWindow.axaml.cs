@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using OrbisDbTools.Avalonia.ViewModels;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace OrbisDbTools.Avalonia.Views
 {
@@ -31,7 +32,10 @@ namespace OrbisDbTools.Avalonia.Views
             var dialog = new OpenFileDialog
             {
                 Title = "Browse for local database...",
-                // Filters = new List<FileDialogFilter>() { new FileDialogFilter() { Name = "Database", Extensions = new List<string>() { "*.db" } } },
+                Filters = new List<FileDialogFilter>() {
+                    new FileDialogFilter() { Name = "Database files (.db)", Extensions = new List<string>() { "db*" } },
+                    new FileDialogFilter() { Name = "All files", Extensions = new List<string>() { "*" } },
+                },
                 AllowMultiple = false
             };
 
