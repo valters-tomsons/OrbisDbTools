@@ -1,18 +1,19 @@
 using System.Net;
-using OrbisDbTools.PS4.Discovery;
+using OrbisDbTools.Lib.Providers;
+using OrbisDbTools.PS4;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 
-namespace OrbisDbTools.PS4.AppDb;
+namespace OrbisDbTools.Lib.Controllers;
 
-public class AppDbController
+public class MainWindowController
 {
     private readonly AppDbProvider _dbProvider;
-    private readonly DiscoveryService _discovery;
+    private readonly OrbisFileSystemProvider _discovery;
 
     private Uri? _localAppDb;
 
-    public AppDbController(DiscoveryService discoveryService, AppDbProvider dbProvider)
+    public MainWindowController(OrbisFileSystemProvider discoveryService, AppDbProvider dbProvider)
     {
         _discovery = discoveryService;
         _dbProvider = dbProvider;

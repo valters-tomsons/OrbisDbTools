@@ -1,23 +1,28 @@
 using FluentFTP;
 using OrbisDbTools.PS4.Models;
+using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.Utils;
 using OrbisDbTools.Utils.Connections;
 using OrbisDbTools.PS4.Enums;
 
-namespace OrbisDbTools.PS4.Discovery;
+namespace OrbisDbTools.Lib.Providers;
 
-public class DiscoveryService : IAsyncDisposable
+public class OrbisFileSystemProvider : IAsyncDisposable
 {
     private IFtpClient? _ftpClient;
 
     public async Task<Uri?> DownloadAppDb(string consoleIp)
     {
         _ftpClient = await FtpConnectionFactory.OpenConnection(consoleIp);
-        var status = await _ftpClient.DownloadFileAsync($"{ClientConfig.TempDirectory.LocalPath}/{Constants.AppDbFileName}", Constants.MmsFolderPath + Constants.AppDbFileName);
+
+        var localPath = $"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}";
+        const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName;
+
+        var status = await _ftpClient.DownloadFileAsync(localPath, remotePath);
 
         if (status == FtpStatus.Success)
         {
-            return new Uri($"{ClientConfig.TempDirectory.LocalPath}/{Constants.AppDbFileName}");
+            return new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
         }
 
         return null;
@@ -32,7 +37,7 @@ public class DiscoveryService : IAsyncDisposable
         }
 
         using var stream = new FileStream(appDbPath.LocalPath, FileMode.Open);
-        return await _ftpClient?.UploadFileAsync(appDbPath.LocalPath, Constants.MmsFolderPath + Constants.AppDbFileName, FtpRemoteExists.Overwrite);
+        return await _ftpClient?.UploadFileAsync(appDbPath.LocalPath, OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName, FtpRemoteExists.Overwrite);
     }
 
     public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSize(IEnumerable<AppTitle> titles)
@@ -68,7 +73,7 @@ public class DiscoveryService : IAsyncDisposable
 
         if (title.ExternalStorage)
         {
-            contentDataPath = Constants.ExternalDriveMountPoint0 + contentDataPath;
+            contentDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + contentDataPath;
         }
 
         var pkgInfo = await _ftpClient?.GetObjectInfoAsync(contentDataPath);
@@ -80,7 +85,7 @@ public class DiscoveryService : IAsyncDisposable
         var dlcDataPath = $"/user/addcont/{title.TitleId}/";
         if (title.ExternalStorage)
         {
-            dlcDataPath = Constants.ExternalDriveMountPoint0 + dlcDataPath;
+            dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
         }
 
         var exists = await _ftpClient?.DirectoryExistsAsync(dlcDataPath);

@@ -1,7 +1,7 @@
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
-using OrbisDbTools.PS4.AppDb;
+using OrbisDbTools.Lib.Controllers;
 using OrbisDbTools.PS4.Models;
 using ReactiveUI;
 using System.Collections.ObjectModel;
@@ -18,7 +18,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
     public ReactiveCommand<Unit, Unit> ForceDc { get; }
 
-    private readonly AppDbController _controller;
+    private readonly MainWindowController _controller;
 
     public bool DbConnected { get => dbConnected; set => this.RaiseAndSetIfChanged(ref dbConnected, value); }
     private bool dbConnected;
@@ -44,7 +44,7 @@ public class MainWindowViewModel : ViewModelBase
     public Func<Task<Uri?>>? OpenLocalDbDialogAction;
     public Func<Task<Uri?>>? SaveDbLocallyDialogAction;
 
-    public MainWindowViewModel(AppDbController controller)
+    public MainWindowViewModel(MainWindowController controller)
     {
         _controller = controller;
 

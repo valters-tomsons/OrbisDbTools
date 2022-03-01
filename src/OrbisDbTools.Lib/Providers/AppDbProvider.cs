@@ -1,12 +1,12 @@
+using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.PS4.Models;
-using OrbisDbTools.Utils;
 using OrbisDbTools.Utils.Connections;
 using OrbisDbTools.Utils.Extensions;
 using static OrbisDbTools.Utils.Extensions.SqlExtensions;
 using Microsoft.Data.Sqlite;
 using Dapper;
 
-namespace OrbisDbTools.PS4.AppDb;
+namespace OrbisDbTools.Lib.Providers;
 
 /// <summary>
 /// Layer for interacting with Orbis app database at <c>/system_data/priv/mms/app.db</c>
@@ -28,7 +28,7 @@ public class AppDbProvider : IAsyncDisposable
     public async Task<IEnumerable<string>> GetAppTables()
     {
         var tables = await _dbConnection?.EnumerateTables();
-        var appTables = tables?.Where(x => x.StartsWith(Constants.TblAppBrowse));
+        var appTables = tables?.Where(x => x.StartsWith(OrbisSystemPaths.TblAppBrowse));
         return appTables ?? Enumerable.Empty<string>();
     }
 
@@ -41,7 +41,7 @@ public class AppDbProvider : IAsyncDisposable
 
         var installedAppsSql = $@"SELECT titleId, titleName, contentId, contentSize, visible, canRemove, metaDataPath
                                 from {appTable}
-                                where contentId not NULL and metaDataPath like '{Constants.UserAppMetadataPath}%'";
+                                where contentId not NULL and metaDataPath like '{OrbisSystemPaths.UserAppMetadataPath}%'";
 
         var result = await _dbConnection?.QueryAsync<AppTitle>(installedAppsSql);
         return result ?? Enumerable.Empty<AppTitle>();

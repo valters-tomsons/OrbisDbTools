@@ -5,7 +5,7 @@ namespace OrbisDbTools.Utils.Connections;
 
 public static class SqlConnectionFactory
 {
-    public static async Task<SqliteConnection?> OpenConnection(string dataSource = Constants.AppDbFileName)
+    public static async Task<SqliteConnection?> OpenConnection(string dataSource)
     {
         await AssertFileIntegrity(dataSource);
 

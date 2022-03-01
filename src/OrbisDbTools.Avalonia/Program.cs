@@ -6,8 +6,8 @@ using Avalonia.ReactiveUI;
 using Avalonia.Controls;
 using OrbisDbTools.Avalonia.ViewModels;
 using OrbisDbTools.Avalonia.Views;
-using OrbisDbTools.PS4.AppDb;
-using OrbisDbTools.PS4.Discovery;
+using OrbisDbTools.Lib.Providers;
+using OrbisDbTools.Lib.Controllers;
 
 namespace OrbisDbTools.Avalonia;
 
@@ -45,9 +45,9 @@ static class Program
         builder.RegisterType<MainWindow>().SingleInstance();
         builder.RegisterType<MainWindowViewModel>().SingleInstance();
 
-        builder.RegisterType<DiscoveryService>().SingleInstance();
+        builder.RegisterType<OrbisFileSystemProvider>().SingleInstance();
         builder.RegisterType<AppDbProvider>().SingleInstance();
-        builder.RegisterType<AppDbController>().SingleInstance();
+        builder.RegisterType<MainWindowController>().SingleInstance();
 
         return builder.Build();
     }

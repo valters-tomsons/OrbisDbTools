@@ -1,4 +1,4 @@
-using OrbisDbTools.Utils;
+using OrbisDbTools.PS4.Constants;
 
 namespace OrbisDbTools.PS4.Models;
 
@@ -16,5 +16,5 @@ public record AppTitle : IEquatable<AppTitle>
     public bool Visible { get; init; }
     public bool CanRemove { get; init; }
 
-    public bool ExternalStorage => MetaDataPath.StartsWith(Constants.UserExternalAppMetadata);
+    public bool ExternalStorage => MetaDataPath.StartsWith(OrbisSystemPaths.UserExternalAppMetadata);
 }

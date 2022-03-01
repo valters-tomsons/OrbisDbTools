@@ -1,6 +1,6 @@
-namespace OrbisDbTools.Utils;
+namespace OrbisDbTools.PS4.Constants;
 
-public struct Constants
+public struct OrbisSystemPaths
 {
     public const string MmsFolderPath = "/system_data/priv/mms/";
     public const string AppDbFileName = "app.db";
