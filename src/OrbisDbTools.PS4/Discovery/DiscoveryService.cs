@@ -1,6 +1,7 @@
 using FluentFTP;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
+using OrbisDbTools.Utils.Connections;
 using OrbisDbTools.PS4.Enums;
 
 namespace OrbisDbTools.PS4.Discovery;
@@ -9,18 +10,10 @@ public class DiscoveryService : IAsyncDisposable
 {
     private IFtpClient? _ftpClient;
 
-    public async Task<IEnumerable<UserAccount>> GetUserAccounts()
-    {
-        var homeListing = await _ftpClient?.GetListingAsync(Constants.AccountsFolderPath);
-        var accountHashIds = homeListing.Where(x => x.Type == FtpFileSystemObjectType.Directory).Select(x => x.Name).ToList();
-        return accountHashIds.Select(x => new UserAccount(x));
-    }
-
     public async Task<Uri?> DownloadAppDb(string consoleIp)
     {
-        var client = await CreateFtpClient(consoleIp);
-
-        var status = await client.DownloadFileAsync($"{ClientConfig.TempDirectory.LocalPath}/{Constants.AppDbFileName}", Constants.MmsFolderPath + Constants.AppDbFileName);
+        _ftpClient = await FtpConnectionFactory.OpenConnection(consoleIp);
+        var status = await _ftpClient.DownloadFileAsync($"{ClientConfig.TempDirectory.LocalPath}/{Constants.AppDbFileName}", Constants.MmsFolderPath + Constants.AppDbFileName);
 
         if (status == FtpStatus.Success)
         {
@@ -101,25 +94,6 @@ public class DiscoveryService : IAsyncDisposable
         var dlcsTotalSize = contentPkgs.Sum(x => x.Size);
 
         return new ContentSizeDto(title.TitleId, dlcsTotalSize);
-    }
-
-    private async Task<IFtpClient> CreateFtpClient(string ipAddress)
-    {
-        var parts = ipAddress.Split(':');
-
-        var ip = parts.FirstOrDefault();
-        var portString = parts.Length > 1 ? parts[1] : string.Empty;
-
-        var isPort = int.TryParse(portString, out var port);
-
-        if (!isPort)
-        {
-            port = 2121;
-        }
-
-        _ftpClient = new FtpClient(ip, port, new());
-        await _ftpClient.ConnectAsync();
-        return _ftpClient;
     }
 
     public async ValueTask DisposeAsync()
