@@ -131,20 +131,5 @@ namespace OrbisDbTools.PS4.Discovery
 
             GC.SuppressFinalize(this);
         }
-
-        // private async Task DownloadUserConfigs(FtpClient client, IList<string> hashIds)
-        // {
-        //     var downloadPath = ClientConfig.TempDirectory.LocalPath;
-        //     Directory.CreateDirectory(downloadPath);
-
-        //     var remotePaths = new List<string>(hashIds.Count);
-
-        //     foreach (var id in hashIds)
-        //     {
-        //         remotePaths.Add($"{Constants.AccountsFolderPath}{id}/{Constants.AccountConfigFileName}");
-        //     }
-
-        //     var downloaded = await client.DownloadFilesAsync(downloadPath, remotePaths);
-        // }
     }
 }

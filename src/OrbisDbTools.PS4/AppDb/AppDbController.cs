@@ -18,9 +18,9 @@ namespace OrbisDbTools.PS4.AppDb
             _dbProvider = dbProvider;
         }
 
-        public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogAction)
+        public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
         {
-            _localAppDb = await fileDialogAction().ConfigureAwait(true);
+            _localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
             if (_localAppDb is not null)
             {
                 var fileDirectory = Path.GetDirectoryName(_localAppDb.LocalPath);
