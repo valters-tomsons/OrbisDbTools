@@ -40,7 +40,7 @@ public class OrbisFileSystemProvider : IAsyncDisposable
         return await _ftpClient?.UploadFileAsync(appDbPath.LocalPath, OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName, FtpRemoteExists.Overwrite);
     }
 
-    public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSize(IEnumerable<AppTitle> titles)
+    public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSizes(IEnumerable<AppTitle> titles)
     {
         var result = new List<ContentSizeDto>();
         foreach (var title in titles)
@@ -53,7 +53,10 @@ public class OrbisFileSystemProvider : IAsyncDisposable
 
             if (appSize is not null)
             {
-                var totalSize = appSize.TotalSizeInBytes + (patchSize?.TotalSizeInBytes ?? 0) + (dlcSize?.TotalSizeInBytes ?? 0);
+                var totalSize = appSize.TotalSizeInBytes +
+                                    (patchSize?.TotalSizeInBytes ?? 0) +
+                                    (dlcSize?.TotalSizeInBytes ?? 0);
+
                 result.Add(new ContentSizeDto(titleId, totalSize));
             }
         }

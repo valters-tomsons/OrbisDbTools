@@ -123,10 +123,10 @@ public class MainWindowController
         foreach (var appTable in userAppTables)
         {
             var installedTitles = await _dbProvider.GetInstalledTitles(appTable);
-
-            var titleSizes = await _discovery.CalculateTitleSize(installedTitles);
+            var titleSizes = await _discovery.CalculateTitleSizes(installedTitles);
 
             var updatedSizes = await _dbProvider.UpdateTitleSizes(appTable, titleSizes);
+
             Console.WriteLine($"Updated content size for {updatedSizes} titles in {appTable}");
             count += updatedSizes;
         }
