@@ -3,151 +3,150 @@ using OrbisDbTools.PS4.Discovery;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 
-namespace OrbisDbTools.PS4.AppDb
+namespace OrbisDbTools.PS4.AppDb;
+
+public class AppDbController
 {
-    public class AppDbController
+    private readonly AppDbProvider _dbProvider;
+    private readonly DiscoveryService _discovery;
+
+    private Uri? _localAppDb;
+
+    public AppDbController(DiscoveryService discoveryService, AppDbProvider dbProvider)
     {
-        private readonly AppDbProvider _dbProvider;
-        private readonly DiscoveryService _discovery;
+        _discovery = discoveryService;
+        _dbProvider = dbProvider;
+    }
 
-        private Uri? _localAppDb;
-
-        public AppDbController(DiscoveryService discoveryService, AppDbProvider dbProvider)
+    public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
+    {
+        _localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
+        if (_localAppDb is not null)
         {
-            _discovery = discoveryService;
-            _dbProvider = dbProvider;
+            var fileDirectory = Path.GetDirectoryName(_localAppDb.LocalPath);
+            var fileName = Path.GetFileName(_localAppDb.LocalPath);
+
+            File.Copy(_localAppDb.LocalPath, $"{fileDirectory}/{fileName}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+            return await _dbProvider.OpenDatabase(_localAppDb.LocalPath).ConfigureAwait(true);
         }
 
-        public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
+        return false;
+    }
+
+    public async Task<bool> DownloadAndConnect(string consoleIp)
+    {
+        if (!IPAddress.TryParse(consoleIp, out var _))
         {
-            _localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
+            throw new Exception("Not a valid IP address");
+        }
+
+        if (!string.IsNullOrWhiteSpace(consoleIp))
+        {
+            _localAppDb = await _discovery.DownloadAppDb(consoleIp);
             if (_localAppDb is not null)
             {
-                var fileDirectory = Path.GetDirectoryName(_localAppDb.LocalPath);
-                var fileName = Path.GetFileName(_localAppDb.LocalPath);
-
-                File.Copy(_localAppDb.LocalPath, $"{fileDirectory}/{fileName}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
-                return await _dbProvider.OpenDatabase(_localAppDb.LocalPath).ConfigureAwait(true);
+                File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+                return await _dbProvider.OpenDatabase(_localAppDb.LocalPath);
             }
-
-            return false;
         }
 
-        public async Task<bool> DownloadAndConnect(string consoleIp)
+        return false;
+    }
+
+    public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
+    {
+        await _discovery.DisposeAsync();
+        await _dbProvider.DisposeAsync();
+
+        var targetPath = await fileDialogAction().ConfigureAwait(true);
+        if (targetPath is not null)
         {
-            if (!IPAddress.TryParse(consoleIp, out var _))
-            {
-                throw new Exception("Not a valid IP address");
-            }
-
-            if (!string.IsNullOrWhiteSpace(consoleIp))
-            {
-                _localAppDb = await _discovery.DownloadAppDb(consoleIp);
-                if (_localAppDb is not null)
-                {
-                    File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
-                    return await _dbProvider.OpenDatabase(_localAppDb.LocalPath);
-                }
-            }
-
-            return false;
+            File.Copy($"{ClientConfig.TempDirectory.LocalPath}/app.db", targetPath.LocalPath, true);
         }
+    }
 
-        public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
+    public async Task CloseLocalDb()
+    {
+        await _dbProvider.DisposeAsync();
+        await _discovery.DisposeAsync();
+        Console.WriteLine("Finished disconnect");
+    }
+
+    public async Task<IList<AppTitle>> QueryInstalledApps()
+    {
+        var appTables = await _dbProvider.GetAppTables();
+
+        if (!appTables.Any())
         {
-            await _discovery.DisposeAsync();
-            await _dbProvider.DisposeAsync();
-
-            var targetPath = await fileDialogAction().ConfigureAwait(true);
-            if (targetPath is not null)
-            {
-                File.Copy($"{ClientConfig.TempDirectory.LocalPath}/app.db", targetPath.LocalPath, true);
-            }
+            return Array.Empty<AppTitle>();
         }
 
-        public async Task CloseLocalDb()
+        var titles = await _dbProvider
+            .GetInstalledTitles(appTables.First());
+
+        if (titles is null)
         {
-            await _dbProvider.DisposeAsync();
-            await _discovery.DisposeAsync();
-            Console.WriteLine("Finished disconnect");
+            return Array.Empty<AppTitle>();
         }
 
-        public async Task<IList<AppTitle>> QueryInstalledApps()
+        return titles.ToList();
+    }
+
+    public async Task<int> HideAllKnownPsnApps()
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+
+        var count = 0;
+
+        foreach (var appTable in userAppTables)
         {
-            var appTables = await _dbProvider.GetAppTables();
+            var installedTitles = await _dbProvider.GetAllTitles(appTable);
 
-            if (!appTables.Any())
-            {
-                return Array.Empty<AppTitle>();
-            }
+            var knownPsnIds = KnownContent.KnownPsnApps.Select(x => x.TitleId);
+            var installedPsnApps = installedTitles.Where(x => knownPsnIds.Contains(x.TitleId));
 
-            var titles = await _dbProvider
-                .GetInstalledTitles(appTables.First());
-
-            if (titles is null)
-            {
-                return Array.Empty<AppTitle>();
-            }
-
-            return titles.ToList();
+            var hidden = await _dbProvider.HideTitles(appTable, installedPsnApps);
+            Console.WriteLine($"Hidden {hidden} apps in {appTable}");
+            count += hidden;
         }
 
-        public async Task<int> HideAllKnownPsnApps()
+        return count;
+    }
+
+    public async Task<int> ReCalculateInstalledAppSizes()
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+
+        var count = 0;
+
+        foreach (var appTable in userAppTables)
         {
-            var userAppTables = await _dbProvider.GetAppTables();
+            var installedTitles = await _dbProvider.GetInstalledTitles(appTable);
 
-            var count = 0;
+            var titleSizes = await _discovery.CalculateTitleSize(installedTitles);
 
-            foreach (var appTable in userAppTables)
-            {
-                var installedTitles = await _dbProvider.GetAllTitles(appTable);
-
-                var knownPsnIds = KnownContent.KnownPsnApps.Select(x => x.TitleId);
-                var installedPsnApps = installedTitles.Where(x => knownPsnIds.Contains(x.TitleId));
-
-                var hidden = await _dbProvider.HideTitles(appTable, installedPsnApps);
-                Console.WriteLine($"Hidden {hidden} apps in {appTable}");
-                count += hidden;
-            }
-
-            return count;
+            var updatedSizes = await _dbProvider.UpdateTitleSizes(appTable, titleSizes);
+            Console.WriteLine($"Updated content size for {updatedSizes} titles in {appTable}");
+            count += updatedSizes;
         }
 
-        public async Task<int> ReCalculateInstalledAppSizes()
+        return count;
+    }
+
+    public async Task<int> AllowDeleteInstalledApps()
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+
+        var count = 0;
+
+        foreach (var appTable in userAppTables)
         {
-            var userAppTables = await _dbProvider.GetAppTables();
-
-            var count = 0;
-
-            foreach (var appTable in userAppTables)
-            {
-                var installedTitles = await _dbProvider.GetInstalledTitles(appTable);
-
-                var titleSizes = await _discovery.CalculateTitleSize(installedTitles);
-
-                var updatedSizes = await _dbProvider.UpdateTitleSizes(appTable, titleSizes);
-                Console.WriteLine($"Updated content size for {updatedSizes} titles in {appTable}");
-                count += updatedSizes;
-            }
-
-            return count;
+            var installedTitles = await _dbProvider.GetInstalledTitles(appTable);
+            var allowedDelete = await _dbProvider.EnableTitleDeletion(appTable, installedTitles);
+            Console.WriteLine($"Enabled deletion for {allowedDelete} apps in {appTable}");
+            count += allowedDelete;
         }
 
-        public async Task<int> AllowDeleteInstalledApps()
-        {
-            var userAppTables = await _dbProvider.GetAppTables();
-
-            var count = 0;
-
-            foreach (var appTable in userAppTables)
-            {
-                var installedTitles = await _dbProvider.GetInstalledTitles(appTable);
-                var allowedDelete = await _dbProvider.EnableTitleDeletion(appTable, installedTitles);
-                Console.WriteLine($"Enabled deletion for {allowedDelete} apps in {appTable}");
-                count += allowedDelete;
-            }
-
-            return count;
-        }
+        return count;
     }
 }
