@@ -3,9 +3,9 @@ using Microsoft.Data.Sqlite;
 
 namespace OrbisDbTools.Utils;
 
-public class ConnectionFactory
+public static class SqlConnectionFactory
 {
-    public async Task<SqliteConnection?> OpenConnection(string dataSource = Constants.AppDbFileName)
+    public static async Task<SqliteConnection?> OpenConnection(string dataSource = Constants.AppDbFileName)
     {
         await AssertFileIntegrity(dataSource);
 

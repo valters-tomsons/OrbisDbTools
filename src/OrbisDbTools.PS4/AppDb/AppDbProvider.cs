@@ -12,13 +12,7 @@ namespace OrbisDbTools.PS4.AppDb;
 /// </summary>
 public class AppDbProvider : IAsyncDisposable
 {
-    private readonly ConnectionFactory _connectionFactory;
     private SqliteConnection? _dbConnection;
-
-    public AppDbProvider()
-    {
-        _connectionFactory = new ConnectionFactory();
-    }
 
     /// <summary>
     /// Opens a connection to a local database file
@@ -26,7 +20,7 @@ public class AppDbProvider : IAsyncDisposable
     /// <param name="dbPath">Local path to SQLite database</param>
     public async Task<bool> OpenDatabase(string dbPath)
     {
-        _dbConnection = await _connectionFactory.OpenConnection(dbPath);
+        _dbConnection = await SqlConnectionFactory.OpenConnection(dbPath);
         return _dbConnection != null;
     }
 
