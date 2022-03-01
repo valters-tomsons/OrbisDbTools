@@ -1,5 +1,6 @@
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
+using OrbisDbTools.Utils.Connections;
 using OrbisDbTools.Utils.Extensions;
 using static OrbisDbTools.Utils.Extensions.SqlExtensions;
 using Microsoft.Data.Sqlite;

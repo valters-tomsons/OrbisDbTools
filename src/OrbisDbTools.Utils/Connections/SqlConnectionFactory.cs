@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Data.Sqlite;
 
-namespace OrbisDbTools.Utils;
+namespace OrbisDbTools.Utils.Connections;
 
 public static class SqlConnectionFactory
 {
