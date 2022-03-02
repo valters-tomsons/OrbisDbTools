@@ -3,14 +3,14 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>linux-x64;win-x64;osx-x64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <DebugType>None</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <PublishTrimmed>true</PublishTrimmed>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Models\" />
@@ -19,15 +19,17 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="6.3.0" />
-    <PackageReference Include="Avalonia" Version="0.10.11" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.11" />
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.11" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.11" />
+    <PackageReference Include="Avalonia" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.12" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.12" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.12" />
+    <PackageReference Include="MessageBox.Avalonia" Version="1.7.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\OrbisDbTools.PS4\OrbisDbTools.PS4.csproj" />
     <ProjectReference Include="..\OrbisDbTools.Utils\OrbisDbTools.Utils.csproj" />
     <ProjectReference Include="..\..\external\LibOrbisPkg\LibOrbisPkg.Core\LibOrbisPkg.Core.csproj" />
+    <ProjectReference Include="..\OrbisDbTools.Lib\OrbisDbTools.Lib.csproj" />
   </ItemGroup>
 </Project>

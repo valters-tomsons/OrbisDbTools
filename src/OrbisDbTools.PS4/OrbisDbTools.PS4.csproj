@@ -13,15 +13,4 @@
     <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.1" />
-    <PackageReference Include="FluentFTP" Version="36.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\OrbisDbTools.Utils\OrbisDbTools.Utils.csproj" />
-    <ProjectReference Include="..\OrbisDbTools.Lib\OrbisDbTools.Lib.csproj" />
-    <ProjectReference Include="..\..\external\LibOrbisPkg\LibOrbisPkg.Core\LibOrbisPkg.Core.csproj" />
-  </ItemGroup>
-
 </Project>

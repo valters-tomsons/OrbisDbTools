@@ -1,7 +1,20 @@
-namespace OrbisDbTools.Utils
+namespace OrbisDbTools.Utils;
+
+public static class ClientConfig
 {
-    public static class ClientConfig
+    public static Uri TempDirectory { get; }
+
+    private const string ToolsFolderName = "OrbisDbTools";
+    private const string DefaultTmpPath = "/tmp/";
+
+    static ClientConfig()
     {
-        public static readonly Uri TempDirectory = new("/tmp/orbisdbtools");
+        var tmpdir = Path.GetTempPath() ?? DefaultTmpPath;
+        if (string.IsNullOrWhiteSpace(tmpdir))
+        {
+            tmpdir = DefaultTmpPath;
+        }
+
+        TempDirectory = new(Path.Combine(tmpdir, ToolsFolderName));
     }
 }

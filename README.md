@@ -1,0 +1,27 @@
+# OrbisDbTools
+
+OrbisDbTools is a free cross-platform application for interacting with hacked `PlayStation®4` system databases.  
+
+## Features
+
+* Re-calculate installed application size (fixes absurd game sizes in [this screen](promo/screen4.jpg))
+* Re-enable app deletion for user installed apps
+* Hide apps that require PSN ([listed here](https://github.com/valters-tomsons/OrbisDbTools/blob/main/src/OrbisDbTools.PS4/KnownContent.cs#L22))
+
+This tool will also automatically backup your `app.db` file to `$TMPDIR/app.db.$TIMESTAMP` when connecting via network. Local database files are backed up in file directory with `.$TIMESTAMP` appended to filename.
+
+## Usage
+
+* Download latest release from `Releases` section for your platform
+* Extract downloaded archive into a folder
+* Launch `OrbisDbTools.Avalonia` executable
+* After patching, upload resulting `app.db` to your PS4 at `/system_data/priv/mms/app.db`
+* Launch internet browser on your PS4, then go back to system menu to see your changes
+
+## Screenshots
+
+![](promo/screen1.png)
+
+![](promo/screen2.png)
+
+![](promo/screen3.png)

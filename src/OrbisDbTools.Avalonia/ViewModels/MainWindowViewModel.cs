@@ -1,7 +1,7 @@
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
-using OrbisDbTools.PS4.AppDb;
+using OrbisDbTools.Lib.Controllers;
 using OrbisDbTools.PS4.Models;
 using ReactiveUI;
 using System.Collections.ObjectModel;
@@ -11,15 +11,20 @@ namespace OrbisDbTools.Avalonia.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     public ReactiveCommand<Unit, Unit> ConnectDb { get; }
+    public ReactiveCommand<Unit, Unit> BrowseDb { get; }
+
     public ReactiveCommand<Unit, Unit> RecalculateDbContent { get; }
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
     public ReactiveCommand<Unit, Unit> ForceDc { get; }
 
-    private readonly AppDbController _controller;
+    private readonly MainWindowController _controller;
 
     public bool DbConnected { get => dbConnected; set => this.RaiseAndSetIfChanged(ref dbConnected, value); }
     private bool dbConnected;
+
+    public bool IsLocalDb { get => isLocalDb; set => this.RaiseAndSetIfChanged(ref isLocalDb, value); }
+    private bool isLocalDb;
 
     public string ConsoleIpAddress { get => consoleIpAddress; set => this.RaiseAndSetIfChanged(ref consoleIpAddress, value); }
     private string consoleIpAddress = string.Empty;
@@ -36,7 +41,10 @@ public class MainWindowViewModel : ViewModelBase
     public ObservableCollection<AppTitle> DbItems { get => dbItems; set => this.RaiseAndSetIfChanged(ref dbItems, value); }
     private ObservableCollection<AppTitle> dbItems = new();
 
-    public MainWindowViewModel(AppDbController controller)
+    public Func<Task<Uri?>>? OpenLocalDbDialogAction;
+    public Func<Task<Uri?>>? SaveDbLocallyDialogAction;
+
+    public MainWindowViewModel(MainWindowController controller)
     {
         _controller = controller;
 
@@ -45,6 +53,24 @@ public class MainWindowViewModel : ViewModelBase
         AllowDeleteApps = ReactiveCommand.CreateFromTask(MarkCanRemoveInstalled);
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
         ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
+        BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
+    }
+
+    async Task BrowseLocalDatabase()
+    {
+        try
+        {
+            DbConnected = await _controller.PrompAndOpenLocalDatabase(OpenLocalDbDialogAction).ConfigureAwait(true);
+            if (DbConnected)
+            {
+                await UpdateDbItems();
+                IsLocalDb = true;
+            }
+        }
+        catch (Exception e)
+        {
+            ConnectionError = $"Failed to connect: {e.Message}";
+        }
     }
 
     async Task UpdateDbItems()
@@ -56,7 +82,15 @@ public class MainWindowViewModel : ViewModelBase
     async Task ForceDisconnect()
     {
         ShowSpinner("Disconnecting, please wait...");
-        await _controller.DisconnectFromConsole();
+
+        if (IsLocalDb)
+        {
+            await _controller.CloseLocalDb();
+        }
+        else
+        {
+            await _controller.DisconnectRemoteAndPromptSave(SaveDbLocallyDialogAction).ConfigureAwait(true);
+        }
 
         DbConnected = false;
         ShowProgressBar = false;
@@ -70,6 +104,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             DbConnected = await _controller.DownloadAndConnect(consoleIpAddress).ConfigureAwait(false);
             await UpdateDbItems();
+            IsLocalDb = false;
         }
         catch (Exception e)
         {
