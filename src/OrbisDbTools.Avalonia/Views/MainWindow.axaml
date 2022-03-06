@@ -9,6 +9,7 @@
         WindowStartupLocation="CenterScreen"
         x:Class="OrbisDbTools.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
+        CanResize="false"
         Title="OrbisDbTools">
 
     <Design.DataContext>
@@ -16,7 +17,7 @@
     </Design.DataContext>
 
     <Grid>
-        <Image Source="/Assets/GamingBackground.png" Stretch="Fill" />
+        <Image Source="/Assets/GamingBackground.png" Stretch="UniformToFill" />
 
         <Grid IsVisible="{Binding !DbConnected}" Name="PsConnection" HorizontalAlignment="Center" >
             <TextBlock 
