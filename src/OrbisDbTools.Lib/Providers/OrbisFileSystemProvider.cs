@@ -28,6 +28,7 @@ public class OrbisFileSystemProvider : IAsyncDisposable
         return null;
     }
 
+    [Obsolete("FluentFTP does not seem to support upload currently.", true)]
     public async Task<FtpStatus> UploadAppDb(Uri appDbPath)
     {
         if (string.IsNullOrWhiteSpace(appDbPath.LocalPath))
