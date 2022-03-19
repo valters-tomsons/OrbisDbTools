@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Autofac;
 using Avalonia;
-using Avalonia.ReactiveUI;
 using Avalonia.Controls;
-using OrbisDbTools.Avalonia.ViewModels;
+using Avalonia.ReactiveUI;
 using OrbisDbTools.Avalonia.Views;
-using OrbisDbTools.Lib.Providers;
+using OrbisDbTools.Avalonia.ViewModels;
 using OrbisDbTools.Lib.Controllers;
+using OrbisDbTools.Lib.Providers;
 
 namespace OrbisDbTools.Avalonia;
 
@@ -42,13 +43,24 @@ static class Program
     {
         var builder = new ContainerBuilder();
 
-        builder.RegisterType<MainWindow>().SingleInstance();
-        builder.RegisterType<MainWindowViewModel>().SingleInstance();
+        RegisterSingleInstance(builder, new List<Type>
+        {
+            typeof(MainWindow),
+            typeof(MainWindowController),
+            typeof(MainWindowViewModel),
 
-        builder.RegisterType<OrbisFileSystemProvider>().SingleInstance();
-        builder.RegisterType<AppDbProvider>().SingleInstance();
-        builder.RegisterType<MainWindowController>().SingleInstance();
+            typeof(OrbisFileSystemProvider),
+            typeof(AppDbProvider),
+        });
 
         return builder.Build();
+    }
+
+    private static void RegisterSingleInstance(ContainerBuilder builder, IReadOnlyCollection<Type> types)
+    {
+        foreach (var type in types)
+        {
+            builder.RegisterType(type).SingleInstance();
+        }
     }
 }
