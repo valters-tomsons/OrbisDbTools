@@ -40,11 +40,6 @@ public class OrbisFileSystemProvider : IAsyncDisposable
         return await _ftpClient?.UploadFileAsync(appDbPath.LocalPath, OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName, FtpRemoteExists.Overwrite);
     }
 
-    public async Task ScanGamesFromFilesystem()
-    {
-        // LibOrbisPkg.SFO.ParamSfo.FromStreamAsync()
-    }
-
     public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSizes(IEnumerable<AppTitle> titles)
     {
         var result = new List<ContentSizeDto>();
