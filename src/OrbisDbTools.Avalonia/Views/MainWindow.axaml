@@ -44,7 +44,7 @@
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 50" 
                 Content="BROWSE" IsEnabled="{Binding !ShowProgressBar}" Foreground="#bb86fc" FontFamily="SF Pro Display" FontSize="20"
                 Command="{Binding BrowseDb}" TabIndex="1"
-                ToolTip.Tip="Browse and open a database located on this device"/>
+                ToolTip.Tip="Browse for a local database and open it&#10;Notice: Some features require active connection to console"/>
 
             <TextBlock
                  FontFamily="SF Pro Display" FontSize="16" Text="{Binding ConnectionError}"
