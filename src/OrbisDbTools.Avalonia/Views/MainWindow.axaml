@@ -63,7 +63,7 @@
                 Allow delete installed content</Button>
 
                 <Button Command="{Binding HidePsnApps}"
-                    ToolTip.Tip="Hides applications which do not work without active PSN connection.&apos;This also removes &apos;What's New&apos; app from the home screen among others.">
+                    ToolTip.Tip="Hides applications which do not work without active PSN connection.&#10;It also removes applications like &apos;What's New&apos; from the home screen among others">
                 Hide PSN Apps</Button>
                 <Button Command="{Binding ForceDc}"
                     ToolTip.Tip="Close active connections and save database locally.">
