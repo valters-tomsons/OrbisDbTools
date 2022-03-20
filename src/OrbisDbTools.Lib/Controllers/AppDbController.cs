@@ -1,4 +1,5 @@
 using System.Net;
+using OrbisDbTools.Lib.Abstractions;
 using OrbisDbTools.Lib.Providers;
 using OrbisDbTools.PS4;
 using OrbisDbTools.PS4.Models;
@@ -8,14 +9,16 @@ namespace OrbisDbTools.Lib.Controllers;
 
 public class MainWindowController
 {
+    private readonly OrbisFtp _ftp;
     private readonly AppDbProvider _dbProvider;
-    private readonly OrbisFileSystemProvider _discovery;
+    private readonly FileSystemProvider _discovery;
 
     private Uri? _localAppDb;
 
-    public MainWindowController(OrbisFileSystemProvider discoveryService, AppDbProvider dbProvider)
+    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp)
     {
         _discovery = discoveryService;
+        _ftp = ftp;
         _dbProvider = dbProvider;
     }
 
@@ -43,7 +46,14 @@ public class MainWindowController
 
         if (!string.IsNullOrWhiteSpace(consoleIp))
         {
-            _localAppDb = await _discovery.DownloadAppDb(consoleIp);
+            var connected = await _ftp.OpenConnection(consoleIp);
+
+            if (!connected)
+            {
+                return false;
+            }
+
+            _localAppDb = await _discovery.DownloadAppDb();
             if (_localAppDb is not null)
             {
                 File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
@@ -56,7 +66,7 @@ public class MainWindowController
 
     public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
     {
-        await _discovery.DisposeAsync();
+        await _ftp.DisposeAsync();
         await _dbProvider.DisposeAsync();
 
         var targetPath = await fileDialogAction().ConfigureAwait(true);
@@ -69,7 +79,6 @@ public class MainWindowController
     public async Task CloseLocalDb()
     {
         await _dbProvider.DisposeAsync();
-        await _discovery.DisposeAsync();
         Console.WriteLine("Finished disconnect");
     }
 

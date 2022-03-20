@@ -4,7 +4,7 @@ namespace OrbisDbTools.Utils.Connections;
 
 public static class FtpConnectionFactory
 {
-    public static async Task<IFtpClient?> OpenConnection(string ipAddress)
+    public static IFtpClient CreateClient(string ipAddress)
     {
         var parts = ipAddress.Split(':');
 
@@ -18,18 +18,6 @@ public static class FtpConnectionFactory
             port = 2121;
         }
 
-        var ftpClient = new FtpClient(ip, port, new());
-        await ftpClient.ConnectAsync();
-
-        AssertClientValid(ftpClient);
-        return ftpClient;
-    }
-
-    private static void AssertClientValid(IFtpClient client)
-    {
-        if (!client.IsConnected)
-        {
-            throw new Exception("Failed to connect, make sure FTP is turned on. Double check IP address (and port!)");
-        }
+        return new FtpClient(ip, port, new());
     }
 }

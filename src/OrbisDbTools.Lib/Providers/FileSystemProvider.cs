@@ -1,43 +1,33 @@
-using FluentFTP;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.Utils;
-using OrbisDbTools.Utils.Connections;
 using OrbisDbTools.PS4.Enums;
+using OrbisDbTools.Lib.Abstractions;
 
 namespace OrbisDbTools.Lib.Providers;
 
-public class OrbisFileSystemProvider : IAsyncDisposable
+public class FileSystemProvider
 {
-    private IFtpClient? _ftpClient;
+    private readonly OrbisFtp _ftpClient;
 
-    public async Task<Uri?> DownloadAppDb(string consoleIp)
+    public FileSystemProvider(OrbisFtp ftpClient)
     {
-        _ftpClient = await FtpConnectionFactory.OpenConnection(consoleIp);
+        _ftpClient = ftpClient;
+    }
 
-        var localPath = $"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}";
+    public async Task<Uri?> DownloadAppDb()
+    {
+        var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
         const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName;
 
-        var status = await _ftpClient.DownloadFileAsync(localPath, remotePath);
+        var status = await _ftpClient.DownloadFile(localPath, remotePath);
 
-        if (status == FtpStatus.Success)
+        if (status)
         {
             return new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
         }
 
         return null;
-    }
-
-    public async Task<FtpStatus> UploadAppDb(Uri appDbPath)
-    {
-        if (string.IsNullOrWhiteSpace(appDbPath.LocalPath))
-        {
-            Console.WriteLine("Did NOT find local app.db");
-            return FtpStatus.Skipped;
-        }
-
-        using var stream = new FileStream(appDbPath.LocalPath, FileMode.Open);
-        return await _ftpClient?.UploadFileAsync(appDbPath.LocalPath, OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName, FtpRemoteExists.Overwrite);
     }
 
     public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSizes(IEnumerable<AppTitle> titles)
@@ -79,8 +69,13 @@ public class OrbisFileSystemProvider : IAsyncDisposable
             contentDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + contentDataPath;
         }
 
-        var pkgInfo = await _ftpClient?.GetObjectInfoAsync(contentDataPath);
-        return (pkgInfo is null || pkgInfo.Size == 0) ? null : new ContentSizeDto(title.TitleId, pkgInfo.Size);
+        var fileSize = await _ftpClient.FileSizeInBytes(contentDataPath);
+        if (!fileSize.HasValue || fileSize == 0)
+        {
+            return null;
+        }
+
+        return new ContentSizeDto(title.TitleId, fileSize.Value);
     }
 
     private async Task<ContentSizeDto?> CalculateDlcContentSize(AppTitle title)
@@ -91,26 +86,15 @@ public class OrbisFileSystemProvider : IAsyncDisposable
             dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
         }
 
-        var exists = await _ftpClient?.DirectoryExistsAsync(dlcDataPath);
-        if (!exists)
+        var listing = await _ftpClient.ListFilesAndSizes(dlcDataPath, true);
+        var contentPkgs = listing?.Where(x => x.Key.EndsWith("ac.pkg"));
+
+        if (contentPkgs?.Any() != true)
         {
             return null;
         }
 
-        var listing = await _ftpClient?.GetListingAsync(dlcDataPath, FtpListOption.Recursive);
-        var contentPkgs = listing.Where(x => x.Name.Contains("ac.pkg"));
-        var dlcsTotalSize = contentPkgs.Sum(x => x.Size);
-
+        var dlcsTotalSize = contentPkgs.Sum(x => x.Value);
         return new ContentSizeDto(title.TitleId, dlcsTotalSize);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_ftpClient is not null)
-        {
-            await _ftpClient.DisconnectAsync();
-        }
-
-        GC.SuppressFinalize(this);
     }
 }
