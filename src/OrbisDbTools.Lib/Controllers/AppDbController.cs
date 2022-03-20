@@ -11,11 +11,11 @@ public class MainWindowController
 {
     private readonly OrbisFtp _ftp;
     private readonly AppDbProvider _dbProvider;
-    private readonly OrbisFileSystemProvider _discovery;
+    private readonly FileSystemProvider _discovery;
 
     private Uri? _localAppDb;
 
-    public MainWindowController(OrbisFileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp)
+    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp)
     {
         _discovery = discoveryService;
         _ftp = ftp;

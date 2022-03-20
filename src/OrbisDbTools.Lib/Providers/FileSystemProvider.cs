@@ -6,11 +6,11 @@ using OrbisDbTools.Lib.Abstractions;
 
 namespace OrbisDbTools.Lib.Providers;
 
-public class OrbisFileSystemProvider
+public class FileSystemProvider
 {
     private readonly OrbisFtp _ftpClient;
 
-    public OrbisFileSystemProvider(OrbisFtp ftpClient)
+    public FileSystemProvider(OrbisFtp ftpClient)
     {
         _ftpClient = ftpClient;
     }

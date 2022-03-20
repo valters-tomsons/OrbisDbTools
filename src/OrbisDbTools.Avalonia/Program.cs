@@ -55,7 +55,7 @@ static class Program
             typeof(MainWindowViewModel),
 
             typeof(OrbisFtp),
-            typeof(OrbisFileSystemProvider),
+            typeof(FileSystemProvider),
             typeof(AppDbProvider),
         });
 
