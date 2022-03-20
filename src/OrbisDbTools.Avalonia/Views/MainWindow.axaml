@@ -38,7 +38,7 @@
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 100" 
                 Content="CONNECT" Foreground="#bb86fc" FontFamily="SF Pro Display" FontSize="20"
                 Command="{Binding ConnectDb}" TabIndex="1"
-                ToolTip.Tip="Connect to PS4 using the IP you entered"/>
+                ToolTip.Tip="Connect to your PS4, you must enable FTP server on your jailbroken console"/>
 
             <Button
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 50" 
