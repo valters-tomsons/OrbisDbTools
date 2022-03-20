@@ -27,13 +27,23 @@ public class AppDbProvider : IAsyncDisposable
 
     public async Task<IEnumerable<string>> GetAppTables()
     {
-        var tables = await _dbConnection?.EnumerateTables();
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        var tables = await _dbConnection.EnumerateTables();
         var appTables = tables?.Where(x => x.StartsWith(OrbisSystemPaths.TblAppBrowse));
         return appTables ?? Enumerable.Empty<string>();
     }
 
     public async Task<IEnumerable<AppTitle>> GetInstalledTitles(string appTable)
     {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
         if (string.IsNullOrWhiteSpace(appTable))
         {
             return Enumerable.Empty<AppTitle>();
@@ -43,12 +53,17 @@ public class AppDbProvider : IAsyncDisposable
                                 from {appTable}
                                 where contentId not NULL and metaDataPath like '{OrbisSystemPaths.UserAppMetadataPath}%'";
 
-        var result = await _dbConnection?.QueryAsync<AppTitle>(installedAppsSql);
+        var result = await _dbConnection.QueryAsync<AppTitle>(installedAppsSql);
         return result ?? Enumerable.Empty<AppTitle>();
     }
 
     public async Task<IEnumerable<AppTitle>> GetAllTitles(string appTable)
     {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
         if (string.IsNullOrWhiteSpace(appTable))
         {
             return Enumerable.Empty<AppTitle>();
@@ -56,31 +71,46 @@ public class AppDbProvider : IAsyncDisposable
 
         var appsSql = $"SELECT titleId, titleName, contentId, contentSize, visible, canRemove from {appTable}";
 
-        var result = await _dbConnection?.QueryAsync<AppTitle>(appsSql);
+        var result = await _dbConnection.QueryAsync<AppTitle>(appsSql);
         return result ?? Enumerable.Empty<AppTitle>();
     }
 
     public async Task<int> UpdateTitleSizes(string appTable, IEnumerable<ContentSizeDto> titlesSizes)
     {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
         if (string.IsNullOrWhiteSpace(appTable) || !titlesSizes.Any())
         {
             return 0;
         }
 
         var updateSizeSql = $"UPDATE {appTable} SET contentSize=@TotalSizeInBytes WHERE titleId=@TitleId;";
-        return await _dbConnection?.ExecuteAsync(updateSizeSql, titlesSizes);
+        return await _dbConnection.ExecuteAsync(updateSizeSql, titlesSizes);
     }
 
     public async Task<int> EnableTitleDeletion(string appTable, IEnumerable<AppTitle> titles)
     {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
         var allowDeleteSql = $"UPDATE {appTable} set canRemove=true where titleId in @titleIds";
-        return await _dbConnection?.ExecuteAsync(allowDeleteSql, new { titleIds = titles.Select(x => x.TitleId) });
+        return await _dbConnection.ExecuteAsync(allowDeleteSql, new { titleIds = titles.Select(x => x.TitleId) });
     }
 
     public async Task<int> HideTitles(string appTable, IEnumerable<AppTitle> titles)
     {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
         var hideSql = $"UPDATE {appTable} set visible=false where titleId in @titleIds";
-        return await _dbConnection?.ExecuteAsync(hideSql, new { titleIds = titles.Select(x => x.TitleId) });
+        return await _dbConnection.ExecuteAsync(hideSql, new { titleIds = titles.Select(x => x.TitleId) });
     }
 
     public async ValueTask DisposeAsync()
