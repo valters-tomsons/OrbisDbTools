@@ -7,8 +7,11 @@ using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using OrbisDbTools.Avalonia.Views;
 using OrbisDbTools.Avalonia.ViewModels;
+using OrbisDbTools.Lib.Abstractions;
 using OrbisDbTools.Lib.Controllers;
 using OrbisDbTools.Lib.Providers;
+using ReactiveUI;
+using System.Reactive;
 
 namespace OrbisDbTools.Avalonia;
 
@@ -23,6 +26,7 @@ static class Program
     public static void Main(string[] args)
     {
         var app = BuildAvaloniaApp().SetupWithoutStarting().Instance;
+        RxApp.DefaultExceptionHandler = Observer.AsObserver(new ExceptionHandler());
 
         var container = RegisterServices();
         Scope = container.BeginLifetimeScope();
@@ -38,6 +42,7 @@ static class Program
             .LogToTrace()
             .UseReactiveUI();
 
+    // AutoFac configuration, registers all components
     [ComVisible(false)]
     private static IContainer RegisterServices()
     {
@@ -49,6 +54,7 @@ static class Program
             typeof(MainWindowController),
             typeof(MainWindowViewModel),
 
+            typeof(OrbisFtp),
             typeof(OrbisFileSystemProvider),
             typeof(AppDbProvider),
         });
