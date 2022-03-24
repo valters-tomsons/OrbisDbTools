@@ -56,7 +56,9 @@ static class Program
 
             typeof(OrbisFtp),
             typeof(FileSystemProvider),
+
             typeof(AppDbProvider),
+            typeof(GameDataProvider)
         });
 
         return builder.Build();
