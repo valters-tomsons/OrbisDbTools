@@ -8,6 +8,7 @@ public struct OrbisSystemPaths
     public const string AccountsFolderPath = "/system_data/priv/home/";
     public const string AppMetaFolderPath = "/system_data/priv/appmeta/";
 
+    public const string UserAppPath = "/user/app/";
     public const string UserAppMetadataPath = "/user/appmeta/";
     public const string UserExternalAppMetadata = $"{UserAppMetadataPath}external/";
 
