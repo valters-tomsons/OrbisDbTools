@@ -27,6 +27,44 @@ public class FileSystemProvider
             : null;
     }
 
+    public async Task<IReadOnlyCollection<FsTitle>> ScanFileSystemTitles()
+    {
+        var results = new List<FsTitle>();
+
+        foreach (var dir in new[] { OrbisSystemPaths.UserAppPath, OrbisSystemPaths.UserExternalAppPath })
+        {
+            var listingResult = await _ftpClient.ListFilesAndSizes(dir, false);
+            var fileList = listingResult?.Select(x => x.Key).ToList();
+
+            if (fileList is null)
+            {
+                continue;
+            }
+
+            var titles = ParseFileList(fileList)!;
+            results.AddRange(titles);
+        }
+
+        return results;
+    }
+
+    private IEnumerable<FsTitle> ParseFileList(IReadOnlyCollection<string> contentPaths)
+    {
+        return contentPaths.Select(x => new FsTitle(GetTitleIdFromContentPath(x), x));
+    }
+
+    private static string GetTitleIdFromContentPath(string contentPath)
+    {
+        var fileName = contentPath.Split('/').LastOrDefault();
+
+        if (contentPath.EndsWith(".pkg"))
+        {
+            return fileName?.Replace(".pkg", string.Empty);
+        }
+
+        return fileName;
+    }
+
     public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<AppTitle> titles)
     {
         var results = new List<Uri>(titles.Count);
