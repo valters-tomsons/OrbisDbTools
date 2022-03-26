@@ -60,7 +60,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            DbConnected = await _controller.PrompAndOpenLocalDatabase(OpenLocalDbDialogAction!).ConfigureAwait(true);
+            DbConnected = await _controller.PromptAndOpenLocalDatabase(OpenLocalDbDialogAction!).ConfigureAwait(true);
             if (DbConnected)
             {
                 await UpdateDbItems();
@@ -102,7 +102,7 @@ public class MainWindowViewModel : ViewModelBase
 
         try
         {
-            DbConnected = await _controller.DownloadAndConnect(consoleIpAddress).ConfigureAwait(false);
+            DbConnected = await _controller.ConnectAndDownload(consoleIpAddress).ConfigureAwait(false);
             await UpdateDbItems();
             IsLocalDb = false;
         }

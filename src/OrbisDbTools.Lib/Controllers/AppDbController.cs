@@ -12,17 +12,19 @@ public class MainWindowController
     private readonly OrbisFtp _ftp;
     private readonly AppDbProvider _dbProvider;
     private readonly FileSystemProvider _discovery;
+    private readonly GameDataProvider _sfoReader;
 
     private Uri? _localAppDb;
 
-    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp)
+    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp, GameDataProvider sfoReader)
     {
         _discovery = discoveryService;
         _ftp = ftp;
         _dbProvider = dbProvider;
+        _sfoReader = sfoReader;
     }
 
-    public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
+    public async Task<bool> PromptAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
     {
         _localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
         if (_localAppDb is not null)
@@ -37,7 +39,7 @@ public class MainWindowController
         return false;
     }
 
-    public async Task<bool> DownloadAndConnect(string consoleIp)
+    public async Task<bool> ConnectAndDownload(string consoleIp)
     {
         if (!IPAddress.TryParse(consoleIp, out var _))
         {
@@ -52,6 +54,10 @@ public class MainWindowController
             {
                 return false;
             }
+
+            var systitles = await _discovery.ScanFileSystemTitles();
+            var sfoPaths = await _discovery.DownloadTitleSfos(systitles);
+            var infos = sfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
 
             _localAppDb = await _discovery.DownloadAppDb();
             if (_localAppDb is not null)
