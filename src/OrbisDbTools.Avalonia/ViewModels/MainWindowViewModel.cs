@@ -13,6 +13,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ConnectDb { get; }
     public ReactiveCommand<Unit, Unit> BrowseDb { get; }
 
+    public ReactiveCommand<Unit, Unit> AddMissingTitles { get; }
     public ReactiveCommand<Unit, Unit> RecalculateDbContent { get; }
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
@@ -54,6 +55,16 @@ public class MainWindowViewModel : ViewModelBase
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
         ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
+        AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
+    }
+
+    async Task FixDatabase()
+    {
+        ShowSpinner("Rebuilding database...");
+
+        await _controller.FixMissingAppTitles();
+
+        ShowProgressBar = false;
     }
 
     async Task BrowseLocalDatabase()

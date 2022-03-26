@@ -55,10 +55,6 @@ public class MainWindowController
                 return false;
             }
 
-            var systitles = await _discovery.ScanFileSystemTitles();
-            var sfoPaths = await _discovery.DownloadTitleSfos(systitles);
-            var infos = sfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
-
             _localAppDb = await _discovery.DownloadAppDb();
             if (_localAppDb is not null)
             {
@@ -127,6 +123,19 @@ public class MainWindowController
         }
 
         return count;
+    }
+
+    public async Task FixMissingAppTitles()
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+        var installedTitles = await _dbProvider.GetAllTitles(userAppTables.First());
+
+        var titlesOnFilesystem = await _discovery.ScanFileSystemTitles();
+        var missingTitles = titlesOnFilesystem.Where(x => installedTitles.FirstOrDefault(y => y.TitleId == x.TitleId) == null).ToList();
+        var localSfoPaths = await _discovery.DownloadTitleSfos(missingTitles);
+
+        var parseSfoTasks = localSfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
+        var parseSfoResults = await Task.WhenAll(parseSfoTasks);
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()
