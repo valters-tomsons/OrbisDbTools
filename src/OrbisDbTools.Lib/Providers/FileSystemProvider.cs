@@ -65,14 +65,16 @@ public class FileSystemProvider
         return fileName;
     }
 
-    public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<AppTitle> titles)
+    public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<FsTitle> titles)
     {
         var results = new List<Uri>(titles.Count);
 
         foreach (var title in titles)
         {
             var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/sfo/{title.TitleId}.sfo");
-            var remoteSfoPath = $"{OrbisSystemPaths.AppMetaFolderPath}{title.TitleId}/{OrbisSystemPaths.SfoFileName}";
+
+            var appMetaPath = title.ExternalStorage ? OrbisSystemPaths.AppMetaExternalFolderPath : OrbisSystemPaths.AppMetaFolderPath;
+            var remoteSfoPath = $"{appMetaPath}{title.TitleId}/{OrbisSystemPaths.SfoFileName}";
 
             var downloadSuccess = await _ftpClient.DownloadFile(localPath, remoteSfoPath);
 

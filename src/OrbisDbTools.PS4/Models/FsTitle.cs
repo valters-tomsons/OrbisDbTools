@@ -1,3 +1,5 @@
+using OrbisDbTools.PS4.Constants;
+
 namespace OrbisDbTools.PS4.Models;
 
 public record FsTitle
@@ -6,4 +8,6 @@ public record FsTitle
 
     public string TitleId { get; init; }
     public string ContentPath { get; init; }
+
+    public bool ExternalStorage => ContentPath.StartsWith(OrbisSystemPaths.UserExternalAppPath);
 }

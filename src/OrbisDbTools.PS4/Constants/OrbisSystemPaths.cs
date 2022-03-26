@@ -7,6 +7,7 @@ public struct OrbisSystemPaths
     public const string MmsFolderPath = "/system_data/priv/mms/";
     public const string AccountsFolderPath = "/system_data/priv/home/";
     public const string AppMetaFolderPath = "/system_data/priv/appmeta/";
+    public const string AppMetaExternalFolderPath = "/system_data/priv/appmeta/external/";
 
     public const string UserAppPath = "/user/app/";
     public const string UserExternalAppPath = $"{ExternalDriveMountPoint0}/user/app/";
