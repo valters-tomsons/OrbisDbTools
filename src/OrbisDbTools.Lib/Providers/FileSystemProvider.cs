@@ -20,14 +20,31 @@ public class FileSystemProvider
         var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
         const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName;
 
-        var status = await _ftpClient.DownloadFile(localPath, remotePath);
+        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath);
 
-        if (status)
+        return downloadSuccess
+            ? localPath
+            : null;
+    }
+
+    public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<AppTitle> titles)
+    {
+        var results = new List<Uri>(titles.Count);
+
+        foreach (var title in titles)
         {
-            return new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
+            var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/sfo/{title.TitleId}.sfo");
+            var remoteSfoPath = $"{OrbisSystemPaths.AppMetaFolderPath}{title.TitleId}/{OrbisSystemPaths.SfoFileName}";
+
+            var downloadSuccess = await _ftpClient.DownloadFile(localPath, remoteSfoPath);
+
+            if (downloadSuccess)
+            {
+                results.Add(localPath);
+            }
         }
 
-        return null;
+        return results;
     }
 
     public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSizes(IEnumerable<AppTitle> titles)
@@ -69,13 +86,11 @@ public class FileSystemProvider
             contentDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + contentDataPath;
         }
 
-        var fileSize = await _ftpClient.FileSizeInBytes(contentDataPath);
-        if (!fileSize.HasValue || fileSize == 0)
-        {
-            return null;
-        }
+        var contentFileSize = await _ftpClient.FileSizeInBytes(contentDataPath);
 
-        return new ContentSizeDto(title.TitleId, fileSize.Value);
+        return contentFileSize.GetValueOrDefault() > 1
+            ? new ContentSizeDto(title.TitleId, contentFileSize.Value)
+            : null;
     }
 
     private async Task<ContentSizeDto?> CalculateDlcContentSize(AppTitle title)
@@ -89,12 +104,8 @@ public class FileSystemProvider
         var listing = await _ftpClient.ListFilesAndSizes(dlcDataPath, true);
         var contentPkgs = listing?.Where(x => x.Key.EndsWith("ac.pkg"));
 
-        if (contentPkgs?.Any() != true)
-        {
-            return null;
-        }
-
-        var dlcsTotalSize = contentPkgs.Sum(x => x.Value);
-        return new ContentSizeDto(title.TitleId, dlcsTotalSize);
+        return contentPkgs?.Any() == true
+            ? new ContentSizeDto(title.TitleId, contentPkgs.Sum(x => x.Value))
+            : null;
     }
 }

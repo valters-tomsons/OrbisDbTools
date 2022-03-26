@@ -50,13 +50,15 @@ static class Program
 
         RegisterSingleInstance(builder, new List<Type>
         {
-            typeof(MainWindow),
-            typeof(MainWindowController),
             typeof(MainWindowViewModel),
+            typeof(MainWindowController),
+            typeof(MainWindow),
 
             typeof(OrbisFtp),
             typeof(FileSystemProvider),
+
             typeof(AppDbProvider),
+            typeof(GameDataProvider)
         });
 
         return builder.Build();
