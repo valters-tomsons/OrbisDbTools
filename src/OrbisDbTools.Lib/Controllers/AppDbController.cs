@@ -142,29 +142,29 @@ public class MainWindowController
 
         missingTitles.ForEach(x => x.SFO = Array.Find(parseSfoResults, y => (y!["TITLE_ID"] as Utf8Value)!.Value == x.TitleId));
 
-        var rows = new List<AppBrowseTblRow>(missingTitles.Count);
+        var appBrowseRows = new List<AppBrowseTblRow>(missingTitles.Count);
 
-        foreach (var title in missingTitles.Where(x => x.SFO != null))
+        foreach (var missingFsTitle in missingTitles.Where(x => x.SFO != null))
         {
-            var appMetaPath = title.ExternalStorage
-                ? OrbisSystemPaths.UserExternalAppMetadata + title.TitleId
-                : OrbisSystemPaths.UserAppMetadataPath + title.TitleId;
+            var appMetaPath = missingFsTitle.ExternalStorage
+                ? OrbisSystemPaths.UserExternalAppMetadata + missingFsTitle.TitleId
+                : OrbisSystemPaths.UserAppMetadataPath + missingFsTitle.TitleId;
 
             var row = new AppBrowseTblRow()
             {
-                titleId = (title.SFO!["TITLE_ID"] as Utf8Value)!.Value,
-                contentId = (title.SFO!["CONTENT_ID"] as Utf8Value)!.Value,
-                titleName = (title.SFO!["TITLE"] as Utf8Value)!.Value,
+                titleId = (missingFsTitle.SFO!["TITLE_ID"] as Utf8Value)!.Value,
+                contentId = (missingFsTitle.SFO!["CONTENT_ID"] as Utf8Value)!.Value,
+                titleName = (missingFsTitle.SFO!["TITLE"] as Utf8Value)!.Value,
                 metaDataPath = appMetaPath,
                 lastAccessTime = DateTime.UtcNow,
                 contentSize = 0,
                 installDate = DateTime.UtcNow
             };
 
-            rows.Add(row);
+            appBrowseRows.Add(row);
         }
 
-        await _dbProvider.InsertAppBrowseRows(userAppTables.First(), rows);
+        await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()
