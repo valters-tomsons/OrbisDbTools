@@ -60,10 +60,13 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task FixDatabase()
     {
-        ShowSpinner("Rebuilding database...");
-
+        ShowSpinner("Rebuilding missing app entries...");
         await _controller.FixMissingAppTitles();
+        ShowProgressBar = false;
 
+        ShowSpinner("Calculating content size...");
+        await _controller.ReCalculateInstalledAppSizes();
+        await UpdateDbItems();
         ShowProgressBar = false;
     }
 

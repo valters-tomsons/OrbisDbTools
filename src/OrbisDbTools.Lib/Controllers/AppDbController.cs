@@ -1,7 +1,10 @@
+using System.Data;
 using System.Net;
+using LibOrbisPkg.SFO;
 using OrbisDbTools.Lib.Abstractions;
 using OrbisDbTools.Lib.Providers;
 using OrbisDbTools.PS4;
+using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 
@@ -131,11 +134,37 @@ public class MainWindowController
         var installedTitles = await _dbProvider.GetAllTitles(userAppTables.First());
 
         var titlesOnFilesystem = await _discovery.ScanFileSystemTitles();
-        var missingTitles = titlesOnFilesystem.Where(x => installedTitles.FirstOrDefault(y => y.TitleId == x.TitleId) == null).ToList();
+        var missingTitles = titlesOnFilesystem.Where(x => !installedTitles.Any(y => y.TitleId == x.TitleId)).ToList();
         var localSfoPaths = await _discovery.DownloadTitleSfos(missingTitles);
 
         var parseSfoTasks = localSfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
         var parseSfoResults = await Task.WhenAll(parseSfoTasks);
+
+        missingTitles.ForEach(x => x.SFO = Array.Find(parseSfoResults, y => (y!["TITLE_ID"] as Utf8Value)!.Value == x.TitleId));
+
+        var rows = new List<AppBrowseTblRow>(missingTitles.Count);
+
+        foreach (var title in missingTitles.Where(x => x.SFO != null))
+        {
+            var appMetaPath = title.ExternalStorage
+                ? OrbisSystemPaths.UserExternalAppMetadata + title.TitleId
+                : OrbisSystemPaths.UserAppMetadataPath + title.TitleId;
+
+            var row = new AppBrowseTblRow()
+            {
+                titleId = (title.SFO!["TITLE_ID"] as Utf8Value)!.Value,
+                contentId = (title.SFO!["CONTENT_ID"] as Utf8Value)!.Value,
+                titleName = (title.SFO!["TITLE"] as Utf8Value)!.Value,
+                metaDataPath = appMetaPath,
+                lastAccessTime = DateTime.UtcNow,
+                contentSize = 0,
+                installDate = DateTime.UtcNow
+            };
+
+            rows.Add(row);
+        }
+
+        await _dbProvider.InsertAppBrowseRows(userAppTables.First(), rows);
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()

@@ -5,6 +5,7 @@ using OrbisDbTools.Utils.Extensions;
 using static OrbisDbTools.Utils.Extensions.SqlExtensions;
 using Microsoft.Data.Sqlite;
 using Dapper;
+using Dapper.Contrib.Extensions;
 
 namespace OrbisDbTools.Lib.Providers;
 
@@ -35,6 +36,27 @@ public class AppDbProvider : IAsyncDisposable
         var tables = await _dbConnection.EnumerateTables();
         var appTables = tables?.Where(x => x.StartsWith(OrbisSystemPaths.TblAppBrowse));
         return appTables ?? Enumerable.Empty<string>();
+    }
+
+    public async Task<int> InsertAppBrowseRows(string appTable, IReadOnlyCollection<AppBrowseTblRow> rows)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        // Override table name mapper with our current appTable
+        SqlMapperExtensions.TableNameMapper = x =>
+        {
+            if (x == typeof(AppBrowseTblRow))
+            {
+                return appTable;
+            }
+
+            throw new Exception();
+        };
+
+        return await _dbConnection.InsertAsync(rows);
     }
 
     public async Task<IEnumerable<AppTitle>> GetInstalledTitles(string appTable)
