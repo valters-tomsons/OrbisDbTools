@@ -46,6 +46,7 @@ public class AppDbProvider : IAsyncDisposable
         }
 
         // Override table name mapper with our current appTable
+        // This is cursed and I should just write the sql, but I'm too lazy
         SqlMapperExtensions.TableNameMapper = x =>
         {
             if (x == typeof(AppBrowseTblRow))
@@ -53,8 +54,23 @@ public class AppDbProvider : IAsyncDisposable
                 return appTable;
             }
 
+            if (x == typeof(AppInfoTblRow))
+            {
+                return "tbl_appinfo";
+            }
+
             throw new Exception();
         };
+
+        return await _dbConnection.InsertAsync(rows);
+    }
+
+    public async Task<int> InsertAppInfoRows(IReadOnlyCollection<AppInfoTblRow> rows)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
 
         return await _dbConnection.InsertAsync(rows);
     }

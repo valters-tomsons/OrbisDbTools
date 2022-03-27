@@ -11,7 +11,7 @@ public record AppBrowseTblRow
     public string? contentId { get; set; }
     public string titleName { get; set; } = null!;
     public string? metaDataPath { get; set; }
-    public DateTime lastAccessTime { get; set; }
+    public string? lastAccessTime { get; set; }
     public int contentStatus { get; set; }
     public int onDisc { get; set; }
     public int parentalLevel { get; set; } = 5;
@@ -28,9 +28,9 @@ public record AppBrowseTblRow
     public int entitlement { get; set; }
     public string? thumbnailUrl { get; set; }
     public string? lastUpDateTime { get; set; }
-    public DateTime? playableDate { get; set; }
+    public string? playableDate { get; set; }
     public int contentSize { get; set; }
-    public DateTime? installDate { get; set; }
+    public string? installDate { get; set; }
     public int platform { get; set; }
     public string? uiCategory { get; set; } = "game";
     public string? skuId { get; set; }
@@ -48,12 +48,12 @@ public record AppBrowseTblRow
     public string? folderInfo { get; set; }
     public string? parentFolderId { get; set; }
     public int? positionInFolder { get; set; }
-    public DateTime? activeDate { get; set; }
+    public string? activeDate { get; set; }
     public string? entitlementTitleName { get; set; }
     public int? hddLocation { get; set; }
     public int? externalHddAppStatus { get; set; } = 0;
     public string? entitlementIdKamaji { get; set; }
-    public DateTime? mTime { get; set; }
+    public string? mTime { get; set; }
     public int? freePsPlusContent { get; set; } = 0;
     public int? entitlementActiveFlag { get; set; } = 0;
     public int? sizeOtherHdd { get; set; } = 0;
