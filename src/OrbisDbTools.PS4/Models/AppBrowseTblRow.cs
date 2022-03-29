@@ -29,7 +29,7 @@ public record AppBrowseTblRow
     public string? thumbnailUrl { get; set; }
     public string? lastUpDateTime { get; set; }
     public string? playableDate { get; set; }
-    public int contentSize { get; set; }
+    public long contentSize { get; set; }
     public string? installDate { get; set; }
     public int platform { get; set; }
     public string? uiCategory { get; set; } = "game";
@@ -50,7 +50,7 @@ public record AppBrowseTblRow
     public int? positionInFolder { get; set; }
     public string? activeDate { get; set; }
     public string? entitlementTitleName { get; set; }
-    public int? hddLocation { get; set; }
+    public long hddLocation { get; set; }
     public int? externalHddAppStatus { get; set; } = 0;
     public string? entitlementIdKamaji { get; set; }
     public string? mTime { get; set; }
