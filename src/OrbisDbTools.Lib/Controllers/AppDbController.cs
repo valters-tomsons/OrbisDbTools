@@ -136,6 +136,8 @@ public class MainWindowController
         var titlesOnFilesystem = await _discovery.ScanFileSystemTitles();
 
         var missingTitles = titlesOnFilesystem.Where(x => !installedTitles.Any(y => y.TitleId == x.TitleId)).ToList();
+
+        // Filter out titles from external storage for now
         missingTitles = missingTitles.Where(x => !x.ExternalStorage).DistinctBy(x => x.TitleId).ToList();
 
         var localSfoPaths = await _discovery.DownloadTitleSfos(missingTitles);
