@@ -151,6 +151,17 @@ public class AppDbProvider : IAsyncDisposable
         return await _dbConnection.ExecuteAsync(hideSql, new { titleIds = titles.Select(x => x.TitleId) });
     }
 
+    public async Task<long> GetExternalHddId()
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        const string sql = "SELECT status from tbl_version where category='external_hdd_id'";
+        return await _dbConnection.ExecuteScalarAsync<long>(sql);
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (_dbConnection is not null)

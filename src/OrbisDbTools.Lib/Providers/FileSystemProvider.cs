@@ -87,6 +87,17 @@ public class FileSystemProvider
         return results;
     }
 
+    public async Task<ContentSizeDto> CalculateAppSize(AppInfoDto appInfo)
+    {
+        var fakeTitle = new AppTitle(appInfo.TitleId, appInfo.Title)
+        {
+            MetaDataPath = appInfo.MetaDataPath
+        };
+
+        var result = await CalculateTitleSizes(new List<AppTitle>(1) { fakeTitle });
+        return result.FirstOrDefault() ?? new ContentSizeDto(appInfo.TitleId, 0);
+    }
+
     public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSizes(IEnumerable<AppTitle> titles)
     {
         var result = new List<ContentSizeDto>();
