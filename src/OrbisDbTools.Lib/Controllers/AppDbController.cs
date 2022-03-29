@@ -4,7 +4,6 @@ using LibOrbisPkg.SFO;
 using OrbisDbTools.Lib.Abstractions;
 using OrbisDbTools.Lib.Providers;
 using OrbisDbTools.PS4;
-using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 using OrbisDbTools.Utils.Extensions;
@@ -129,7 +128,7 @@ public class MainWindowController
         return count;
     }
 
-    public async Task FixMissingAppTitles()
+    public async Task<IReadOnlyCollection<FsTitle>> FixMissingAppTitles()
     {
         var userAppTables = await _dbProvider.GetAppTables();
         var installedTitles = await _dbProvider.GetAllTitles(userAppTables.First());
@@ -146,50 +145,48 @@ public class MainWindowController
         var appBrowseRows = new List<AppBrowseTblRow>(missingTitles.Count);
         var appInfoRows = new List<AppInfoTblRow>(missingTitles.Count * 40);
 
-        foreach (var missingFsTitle in missingTitles.Where(x => x.SFO != null))
+        var missingTitlesWithSfo = missingTitles.Where(x => x.SFO != null).ToList();
+        var externalHddId = await _dbProvider.GetExternalHddId();
+
+        foreach (var missingFsTitle in missingTitlesWithSfo)
         {
-            var appMetaPath = missingFsTitle.ExternalStorage
-                ? OrbisSystemPaths.UserExternalAppMetadata + missingFsTitle.TitleId
-                : OrbisSystemPaths.UserAppMetadataPath + missingFsTitle.TitleId;
+            Console.WriteLine($"Forging entries for: {missingFsTitle.TitleId}");
+
+            var appInfo = new AppInfoDto(missingFsTitle, externalHddId);
+            appInfo.ContentSize = (await _discovery.CalculateAppSize(appInfo)).TotalSizeInBytes;
 
             var appRow = new AppBrowseTblRow()
             {
-                titleId = (missingFsTitle.SFO!["TITLE_ID"] as Utf8Value)!.Value,
-                contentId = (missingFsTitle.SFO!["CONTENT_ID"] as Utf8Value)!.Value,
-                titleName = (missingFsTitle.SFO!["TITLE"] as Utf8Value)!.Value,
-                metaDataPath = appMetaPath,
+                titleId = appInfo.TitleId,
+                contentId = appInfo.ContentId,
+                titleName = appInfo.Title,
+                metaDataPath = appInfo.MetaDataPath,
                 lastAccessTime = DateTime.UtcNow.ToOrbisDateTime(),
-                contentSize = 100000,
-                installDate = DateTime.UtcNow.ToOrbisDateTime()
+                contentSize = appInfo.ContentSize ?? 0,
+                installDate = DateTime.UtcNow.ToOrbisDateTime(),
+                hddLocation = appInfo.HddLocation,
+                mTime = DateTime.UtcNow.ToOrbisDateTime(),
+                category = appInfo.Category,
             };
 
             appBrowseRows.Add(appRow);
-            appInfoRows.AddRange(GenerateInfoRows(missingFsTitle));
+            appInfoRows.AddRange(GenerateInfoRows(missingFsTitle, appInfo));
+
+            Console.WriteLine($"Game info parsed: {appRow.titleName}");
+            break;
         }
 
-        await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
-        await _dbProvider.InsertAppInfoRows(appInfoRows);
+        var appRows = await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
+        var infoRows = await _dbProvider.InsertAppInfoRows(appInfoRows);
+
+        Console.WriteLine($"Added {appRows} new apps, created {infoRows} app_info entries");
+
+        return missingTitlesWithSfo?.Where(x => appBrowseRows.Any(y => y.titleId.Equals(x.TitleId))).ToList() ?? new List<FsTitle>();
     }
 
-    private IReadOnlyCollection<AppInfoTblRow> GenerateInfoRows(FsTitle title)
+    private IReadOnlyCollection<AppInfoTblRow> GenerateInfoRows(FsTitle title, AppInfoDto appInfo)
     {
-        var appPath = title.ExternalStorage
-            ? OrbisSystemPaths.UserExternalAppPath + title.TitleId
-            : OrbisSystemPaths.UserAppPath + title.TitleId;
-
-        var metaDataPath = title.ExternalStorage
-            ? OrbisSystemPaths.UserExternalAppMetadata + title.TitleId
-            : OrbisSystemPaths.UserAppMetadataPath + title.TitleId;
-
-        var appType = (title.SFO!["APP_TYPE"] as IntegerValue)!.Value;
-        var appVer = (title.SFO!["APP_VER"] as Utf8Value)!.Value;
-        var attribute = (title.SFO!["ATTRIBUTE"] as IntegerValue)!.Value;
-        var category = (title.SFO!["CATEGORY"] as Utf8Value)!.Value;
-        var contentId = (title.SFO!["CONTENT_ID"] as Utf8Value)!.Value;
-        var titleName = (title.SFO!["TITLE"] as Utf8Value)!.Value;
-        var version = (title.SFO!["VERSION"] as Utf8Value)!.Value;
-
-        return new List<AppInfoTblRow>
+        var results = new List<AppInfoTblRow>
         {
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_access_index", Val = "67" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_last_access_time", Val = DateTime.UtcNow.ToOrbisDateTime() },
@@ -200,9 +197,9 @@ public class MainWindowController
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "ATTRIBUTE_INTERNAL", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "DISP_LOCATION_1", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "DISP_LOCATION_2", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "DOWNLOAD_DATA_SIZE", Val = "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "DOWNLOAD_DATA_SIZE", Val = appInfo.DownloadDataSize.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "FORMAT", Val = "obs" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "PARENTAL_LEVEL", Val = "1" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "PARENTAL_LEVEL", Val = appInfo.ParentalLevel.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_1", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_3", Val = "0" },
@@ -210,7 +207,7 @@ public class MainWindowController
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_5", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_6", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_7", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "SYSTEM_VER", Val = "33751040" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "SYSTEM_VER", Val = appInfo.SystemVer },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "USER_DEFINED_PARAM_1", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "USER_DEFINED_PARAM_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "USER_DEFINED_PARAM_3", Val = "0" },
@@ -219,7 +216,7 @@ public class MainWindowController
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_contents_location", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_current_slot", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_disable_live_detail", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_hdd_location", Val = "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_hdd_location", Val = appInfo.HddLocation.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_path_info", Val = "3113537756987392" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_path_info_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_size_other_hdd", Val = "0" },
@@ -228,19 +225,34 @@ public class MainWindowController
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_view_category", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_working_status", Val = "0" },
 
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_size", Val = "100000" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_org_path", Val = appPath },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_metadata_path", Val = metaDataPath},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_size", Val = appInfo.ContentSize.ToString() ?? "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_org_path", Val = appInfo.AppPath },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_metadata_path", Val = appInfo.MetaDataPath},
 
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "APP_TYPE", Val = appType.ToString()},
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "APP_VER", Val = appVer},
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "ATTRIBUTE", Val = attribute.ToString()},
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "CATEGORY", Val = category},
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "CONTENT_ID", Val = contentId},
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "TITLE", Val = titleName},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "APP_TYPE", Val = appInfo.AppType},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "APP_VER", Val = appInfo.AppVer},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "ATTRIBUTE", Val = appInfo.Attribute},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "CATEGORY", Val = appInfo.Category},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "CONTENT_ID", Val = appInfo.ContentId},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "TITLE", Val = appInfo.Title},
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "TITLE_ID", Val = title.TitleId},
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "VERSION", Val = version},
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "VERSION", Val = appInfo.Version},
         };
+
+        var attribute2 = (title.SFO!.GetValueByName("ATTRIBUTE2") as IntegerValue)?.Value.ToString();
+        if (attribute2 != null)
+        {
+            results.Add(
+                new AppInfoTblRow()
+                {
+                    TitleId = title.TitleId,
+                    Key = "ATTRIBUTE2",
+                    Val = attribute2
+                }
+            );
+        }
+
+        return results;
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()
