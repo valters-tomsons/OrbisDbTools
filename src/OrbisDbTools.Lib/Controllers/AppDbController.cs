@@ -134,7 +134,10 @@ public class MainWindowController
         var installedTitles = await _dbProvider.GetAllTitles(userAppTables.First());
 
         var titlesOnFilesystem = await _discovery.ScanFileSystemTitles();
+
         var missingTitles = titlesOnFilesystem.Where(x => !installedTitles.Any(y => y.TitleId == x.TitleId)).ToList();
+        missingTitles = missingTitles.Where(x => !x.ExternalStorage).DistinctBy(x => x.TitleId).ToList();
+
         var localSfoPaths = await _discovery.DownloadTitleSfos(missingTitles);
 
         var parseSfoTasks = localSfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
@@ -173,7 +176,7 @@ public class MainWindowController
             appInfoRows.AddRange(GenerateInfoRows(missingFsTitle, appInfo));
 
             Console.WriteLine($"Game info parsed: {appRow.titleName}");
-            break;
+            // break;
         }
 
         var appRows = await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
