@@ -55,7 +55,7 @@
             <StackPanel Spacing="10" VerticalAlignment="Center" IsVisible="{Binding !ShowProgressBar}" Grid.Column="0" Name="AppDbActions" Orientation="Vertical" Margin="10">
 
                 <Button IsEnabled="{Binding !IsLocalDb}" Command="{Binding AddMissingTitles}"
-                    ToolTip.Tip="">
+                    ToolTip.Tip="Scans installed apps on your console and rebuilds database to make these apps accessible.&#10;Notice: Currently only supports apps installed in internal storage">
                 Rebuild database</Button>
 
                 <Button IsEnabled="{Binding !IsLocalDb}" Command="{Binding RecalculateDbContent}"
