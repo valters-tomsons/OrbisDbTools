@@ -13,7 +13,7 @@ This tool will also automatically backup your `app.db` file to `$TMPDIR/app.db.$
 
 ### Rebuilding database for extended storage apps
 
-**WARNING:** This is not a safe operation and can damage your drive. I hold no responsibility for any damaged drives on consoles resulting from instructions below.
+**WARNING:** This is not a safe operation and can damage your drive. I hold no responsibility for any damaged drives or consoles resulting from instructions below.
 
 You can force PS4 to rebuild apps stored on extended storage manually by disconnecting your storage device **without** using the system menu. After re-plugging the drive, accept prompt to repair the storage device. After a few minutes, your titles should start appearing on the home menu.  
 
