@@ -5,11 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1020" d:DesignHeight="600"
         MinWidth="1020" MinHeight="600"
-        MaxWidth="1020" MaxHeight="600"
         WindowStartupLocation="CenterScreen"
         x:Class="OrbisDbTools.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        CanResize="false"
         Title="OrbisDbTools">
 
     <Design.DataContext>
