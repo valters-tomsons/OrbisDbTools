@@ -27,14 +27,54 @@ public class FileSystemProvider
             : null;
     }
 
-    public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<AppTitle> titles)
+    public async Task<IReadOnlyCollection<FsTitle>> ScanFileSystemTitles()
+    {
+        var results = new List<FsTitle>();
+
+        foreach (var dir in new[] { OrbisSystemPaths.UserAppPath, OrbisSystemPaths.UserExternalAppPath })
+        {
+            var listingResult = await _ftpClient.ListFilesAndSizes(dir, false);
+            var fileList = listingResult?.Select(x => x.Key).ToList();
+
+            if (fileList is null)
+            {
+                continue;
+            }
+
+            var titles = ParseFileList(fileList)!;
+            results.AddRange(titles);
+        }
+
+        return results;
+    }
+
+    private IEnumerable<FsTitle> ParseFileList(IReadOnlyCollection<string> contentPaths)
+    {
+        return contentPaths.Select(x => new FsTitle(GetTitleIdFromContentPath(x), x));
+    }
+
+    private static string GetTitleIdFromContentPath(string contentPath)
+    {
+        var fileName = contentPath.Split('/').LastOrDefault();
+
+        if (contentPath.EndsWith(".pkg"))
+        {
+            return fileName?.Replace(".pkg", string.Empty);
+        }
+
+        return fileName;
+    }
+
+    public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<FsTitle> titles)
     {
         var results = new List<Uri>(titles.Count);
 
         foreach (var title in titles)
         {
             var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/sfo/{title.TitleId}.sfo");
-            var remoteSfoPath = $"{OrbisSystemPaths.AppMetaFolderPath}{title.TitleId}/{OrbisSystemPaths.SfoFileName}";
+
+            var appMetaPath = title.ExternalStorage ? OrbisSystemPaths.AppMetaExternalFolderPath : OrbisSystemPaths.AppMetaFolderPath;
+            var remoteSfoPath = $"{appMetaPath}{title.TitleId}/{OrbisSystemPaths.SfoFileName}";
 
             var downloadSuccess = await _ftpClient.DownloadFile(localPath, remoteSfoPath);
 
@@ -45,6 +85,17 @@ public class FileSystemProvider
         }
 
         return results;
+    }
+
+    public async Task<ContentSizeDto> CalculateAppSize(AppInfoDto appInfo)
+    {
+        var fakeTitle = new AppTitle(appInfo.TitleId, appInfo.Title)
+        {
+            MetaDataPath = appInfo.MetaDataPath
+        };
+
+        var result = await CalculateTitleSizes(new List<AppTitle>(1) { fakeTitle });
+        return result.FirstOrDefault() ?? new ContentSizeDto(appInfo.TitleId, 0);
     }
 
     public async Task<IEnumerable<ContentSizeDto>> CalculateTitleSizes(IEnumerable<AppTitle> titles)

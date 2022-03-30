@@ -15,7 +15,8 @@ public class ExceptionHandler : IObserver<Exception>
 
         var info = new Dictionary<string, string> {
             {"Type", value.GetType().ToString()},
-            {"Message", value.Message}};
+            {"Message", value.Message},
+            {"StackTrace", value.StackTrace ?? "N/A" }};
 
         PrintDictionary(info);
 
@@ -28,7 +29,8 @@ public class ExceptionHandler : IObserver<Exception>
 
         var info = new Dictionary<string, string>() {
             {"Type", error.GetType().ToString()},
-            {"Message", error.Message}};
+            {"Message", error.Message},
+            {"StackTrace", error.StackTrace ?? "N/A"}};
 
         PrintDictionary(info);
 

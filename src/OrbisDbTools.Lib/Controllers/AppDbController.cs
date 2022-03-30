@@ -1,5 +1,8 @@
+using System.Data;
 using System.Net;
+using LibOrbisPkg.SFO;
 using OrbisDbTools.Lib.Abstractions;
+using OrbisDbTools.Lib.Helpers;
 using OrbisDbTools.Lib.Providers;
 using OrbisDbTools.PS4;
 using OrbisDbTools.PS4.Models;
@@ -12,17 +15,19 @@ public class MainWindowController
     private readonly OrbisFtp _ftp;
     private readonly AppDbProvider _dbProvider;
     private readonly FileSystemProvider _discovery;
+    private readonly GameDataProvider _sfoReader;
 
     private Uri? _localAppDb;
 
-    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp)
+    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp, GameDataProvider sfoReader)
     {
         _discovery = discoveryService;
         _ftp = ftp;
         _dbProvider = dbProvider;
+        _sfoReader = sfoReader;
     }
 
-    public async Task<bool> PrompAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
+    public async Task<bool> PromptAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
     {
         _localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
         if (_localAppDb is not null)
@@ -37,7 +42,7 @@ public class MainWindowController
         return false;
     }
 
-    public async Task<bool> DownloadAndConnect(string consoleIp)
+    public async Task<bool> ConnectAndDownload(string consoleIp)
     {
         if (!IPAddress.TryParse(consoleIp, out var _))
         {
@@ -121,6 +126,55 @@ public class MainWindowController
         }
 
         return count;
+    }
+
+    public async Task<IReadOnlyCollection<FsTitle>> FixMissingAppTitles()
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+        var installedTitles = await _dbProvider.GetAllTitles(userAppTables.First());
+
+        var titlesOnFilesystem = await _discovery.ScanFileSystemTitles();
+
+        var missingTitles = titlesOnFilesystem.Where(x => !installedTitles.Any(y => y.TitleId == x.TitleId)).ToList();
+
+        // Filter out titles from external storage for now
+        missingTitles = missingTitles.Where(x => !x.ExternalStorage).DistinctBy(x => x.TitleId).ToList();
+
+        var localSfoPaths = await _discovery.DownloadTitleSfos(missingTitles);
+
+        var parseSfoTasks = localSfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
+        var parseSfoResults = await Task.WhenAll(parseSfoTasks);
+
+        missingTitles.ForEach(x => x.SFO = Array.Find(parseSfoResults, y => (y!["TITLE_ID"] as Utf8Value)!.Value == x.TitleId));
+
+        var appBrowseRows = new List<AppBrowseTblRow>(missingTitles.Count);
+        var appInfoRows = new List<AppInfoTblRow>(missingTitles.Count * 40);
+
+        var missingTitlesWithSfo = missingTitles.Where(x => x.SFO != null).ToList();
+        var externalHddId = await _dbProvider.GetExternalHddId();
+
+        foreach (var missingFsTitle in missingTitlesWithSfo)
+        {
+            Console.WriteLine($"Forging entries for: {missingFsTitle.TitleId}");
+
+            var appInfo = new AppInfoDto(missingFsTitle, externalHddId);
+            appInfo.ContentSize = (await _discovery.CalculateAppSize(appInfo)).TotalSizeInBytes;
+
+            var browseRow = DbRowGenerator.GenerateAppBrowseRow(appInfo);
+            var infoRows = DbRowGenerator.GenerateAppInfoRows(missingFsTitle, appInfo);
+
+            appBrowseRows.Add(browseRow);
+            appInfoRows.AddRange(infoRows);
+
+            Console.WriteLine($"Game info parsed: {browseRow.titleName}");
+        }
+
+        var appRowsInserted = await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
+        var infoRowsInserted = await _dbProvider.InsertAppInfoRows(appInfoRows);
+
+        Console.WriteLine($"Added {appRowsInserted} new apps, created {infoRowsInserted} app_info entries");
+
+        return missingTitlesWithSfo?.Where(x => appBrowseRows.Any(y => y.titleId.Equals(x.TitleId))).ToList() ?? new List<FsTitle>();
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()

@@ -13,6 +13,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ConnectDb { get; }
     public ReactiveCommand<Unit, Unit> BrowseDb { get; }
 
+    public ReactiveCommand<Unit, Unit> AddMissingTitles { get; }
     public ReactiveCommand<Unit, Unit> RecalculateDbContent { get; }
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
@@ -54,13 +55,22 @@ public class MainWindowViewModel : ViewModelBase
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
         ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
+        AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
+    }
+
+    async Task FixDatabase()
+    {
+        ShowSpinner("Rebuilding missing app entries...");
+        _ = await _controller.FixMissingAppTitles();
+        await UpdateDbItems();
+        ShowProgressBar = false;
     }
 
     async Task BrowseLocalDatabase()
     {
         try
         {
-            DbConnected = await _controller.PrompAndOpenLocalDatabase(OpenLocalDbDialogAction!).ConfigureAwait(true);
+            DbConnected = await _controller.PromptAndOpenLocalDatabase(OpenLocalDbDialogAction!).ConfigureAwait(true);
             if (DbConnected)
             {
                 await UpdateDbItems();
@@ -102,7 +112,7 @@ public class MainWindowViewModel : ViewModelBase
 
         try
         {
-            DbConnected = await _controller.DownloadAndConnect(consoleIpAddress).ConfigureAwait(false);
+            DbConnected = await _controller.ConnectAndDownload(consoleIpAddress).ConfigureAwait(false);
             await UpdateDbItems();
             IsLocalDb = false;
         }

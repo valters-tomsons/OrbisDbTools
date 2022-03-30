@@ -5,6 +5,7 @@ using OrbisDbTools.Utils.Extensions;
 using static OrbisDbTools.Utils.Extensions.SqlExtensions;
 using Microsoft.Data.Sqlite;
 using Dapper;
+using Dapper.Contrib.Extensions;
 
 namespace OrbisDbTools.Lib.Providers;
 
@@ -35,6 +36,43 @@ public class AppDbProvider : IAsyncDisposable
         var tables = await _dbConnection.EnumerateTables();
         var appTables = tables?.Where(x => x.StartsWith(OrbisSystemPaths.TblAppBrowse));
         return appTables ?? Enumerable.Empty<string>();
+    }
+
+    public async Task<int> InsertAppBrowseRows(string appTable, IReadOnlyCollection<AppBrowseTblRow> rows)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        // Override table name mapper with our current appTable
+        // This is cursed and I should just write the sql, but I'm too lazy
+        SqlMapperExtensions.TableNameMapper = x =>
+        {
+            if (x == typeof(AppBrowseTblRow))
+            {
+                return appTable;
+            }
+
+            if (x == typeof(AppInfoTblRow))
+            {
+                return "tbl_appinfo";
+            }
+
+            throw new Exception();
+        };
+
+        return await _dbConnection.InsertAsync(rows);
+    }
+
+    public async Task<int> InsertAppInfoRows(IReadOnlyCollection<AppInfoTblRow> rows)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        return await _dbConnection.InsertAsync(rows);
     }
 
     public async Task<IEnumerable<AppTitle>> GetInstalledTitles(string appTable)
@@ -111,6 +149,17 @@ public class AppDbProvider : IAsyncDisposable
 
         var hideSql = $"UPDATE {appTable} set visible=false where titleId in @titleIds";
         return await _dbConnection.ExecuteAsync(hideSql, new { titleIds = titles.Select(x => x.TitleId) });
+    }
+
+    public async Task<long> GetExternalHddId()
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        const string sql = "SELECT status from tbl_version where category='external_hdd_id'";
+        return await _dbConnection.ExecuteScalarAsync<long>(sql);
     }
 
     public async ValueTask DisposeAsync()
