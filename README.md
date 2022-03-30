@@ -5,7 +5,7 @@ OrbisDbTools is a free cross-platform application for interacting with hacked `P
 ## Features
 
 * Re-calculate installed application size (fixes absurd game sizes in [this screen](promo/screen4.jpg))
-* Re-enable app deletion for user installed apps
+* Re-enable app deletion for user installed apps (and Playroom)
 * Hide apps that require PSN ([listed here](https://github.com/valters-tomsons/OrbisDbTools/blob/main/src/OrbisDbTools.PS4/KnownContent.cs#L22))
 * Rebuild apps missing from database [(internal storage only)](#rebuilding-database-for-extended-storage-apps)
 
