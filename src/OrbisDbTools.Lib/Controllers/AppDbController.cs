@@ -172,13 +172,14 @@ public class MainWindowController
                 hddLocation = appInfo.HddLocation,
                 mTime = DateTime.UtcNow.ToOrbisDateTime(),
                 category = appInfo.Category,
+                sizeOtherHdd = appInfo.SizeOtherHdd,
+                parentalLevel = appInfo.ParentalLevel
             };
 
             appBrowseRows.Add(appRow);
             appInfoRows.AddRange(GenerateInfoRows(missingFsTitle, appInfo));
 
             Console.WriteLine($"Game info parsed: {appRow.titleName}");
-            // break;
         }
 
         var appRows = await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
@@ -194,6 +195,7 @@ public class MainWindowController
         var results = new List<AppInfoTblRow>
         {
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_access_index", Val = "67" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_booted", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_last_access_time", Val = DateTime.UtcNow.ToOrbisDateTime() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_contents_status", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_mtime", Val = DateTime.UtcNow.ToOrbisDateTime() },
@@ -205,6 +207,8 @@ public class MainWindowController
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "DOWNLOAD_DATA_SIZE", Val = appInfo.DownloadDataSize.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "FORMAT", Val = "obs" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "PARENTAL_LEVEL", Val = appInfo.ParentalLevel.ToString() },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "PT_PARAM", Val = "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "REMOTE_PLAY_KEY_ASSIGN", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_1", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_3", Val = "0" },
@@ -221,10 +225,11 @@ public class MainWindowController
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_contents_location", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_current_slot", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_disable_live_detail", Val = "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_external_hdd_app_status", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_hdd_location", Val = appInfo.HddLocation.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_path_info", Val = "3113537756987392" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_path_info_2", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_size_other_hdd", Val = "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_size_other_hdd", Val = appInfo.SizeOtherHdd.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_sort_priority", Val = "100" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_uninstallable", Val = "1" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_view_category", Val = "0" },

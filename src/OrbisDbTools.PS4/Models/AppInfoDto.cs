@@ -48,5 +48,6 @@ namespace OrbisDbTools.PS4.Models
 
         public long HddLocation { get; set; }
         public long? ContentSize { get; set; }
+        public long SizeOtherHdd => ExternalStorage ? ContentSize / 10 ?? 0 : 0;
     }
 }

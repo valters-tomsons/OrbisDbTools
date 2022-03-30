@@ -56,7 +56,7 @@ public record AppBrowseTblRow
     public string? mTime { get; set; }
     public int? freePsPlusContent { get; set; } = 0;
     public int? entitlementActiveFlag { get; set; } = 0;
-    public int? sizeOtherHdd { get; set; } = 0;
+    public long? sizeOtherHdd { get; set; } = 0;
     public int? entitlementHidden { get; set; } = 0;
     public int? preorderPlaceholderFlag { get; set; } = 0;
     public string? gatingEntitlementJson { get; set; }
