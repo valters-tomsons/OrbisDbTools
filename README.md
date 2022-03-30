@@ -32,3 +32,7 @@ You can force PS4 to rebuild apps stored on extended storage manually by disconn
 ![](promo/screen2.png)
 
 ![](promo/screen3.png)
+
+## Credits
+
+Database rebuilder code ported from: https://github.com/aizenar/PS4_db_Rebuilder_EXT
