@@ -63,7 +63,7 @@ public class MainWindowViewModel : ViewModelBase
         CellEditEnded += OnCellEditEnded;
     }
 
-    private async void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    private async void OnCellEditEnded(object? _, DataGridCellEditEndedEventArgs e)
     {
         if (e.EditAction != DataGridEditAction.Commit) return;
         if (e.Row.DataContext is not AppTitle editedApp) return;
