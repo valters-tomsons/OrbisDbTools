@@ -78,7 +78,7 @@
             <DataGrid x:Name="DbGrid" IsVisible="{Binding !ShowProgressBar}" Grid.Column="1" AutoGenerateColumns="False" Items="{Binding DbItems}" CanUserResizeColumns="True" CornerRadius="10">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Title ID" IsReadOnly="true" Binding="{Binding TitleId}"/>
-                    <DataGridTextColumn MinWidth="2" Header="Name" Binding="{Binding TitleName}"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
                     <DataGridCheckBoxColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
                     <DataGridTextColumn Header="Size (bytes)" IsReadOnly="true" Binding="{Binding ContentSize}"/>
                     <DataGridCheckBoxColumn Header="External Storage" IsReadOnly="true" Binding="{Binding ExternalStorage}"/>
