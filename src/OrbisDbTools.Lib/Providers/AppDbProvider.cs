@@ -45,24 +45,19 @@ public class AppDbProvider : IAsyncDisposable
             throw new Exception("Cannot query database because it's not connected.");
         }
 
-        // Override table name mapper with our current appTable
-        // This is cursed and I should just write the sql, but I'm too lazy
-        SqlMapperExtensions.TableNameMapper = x =>
+        var count = 0;
+        foreach (var row in rows)
         {
-            if (x == typeof(AppBrowseTblRow))
-            {
-                return appTable;
-            }
+            var sql = $@"INSERT into {appTable} 
+                (titleId, contentId, titleName, metaDataPath, lastAccessTime, contentStatus, onDisc, parentalLevel, visible, sortPriority, pathInfo, lastAccessIndex, dispLocation, canRemove, category, contentType, pathInfo2, presentBoxStatus, entitlement, thumbnailUrl, lastUpdateTime, playableDate, contentSize, installDate, platform, uiCategory, skuId, disableLiveDetail, linkType, linkUri, serviceIdAddCont1, serviceIdAddCont2, serviceIdAddCont3, serviceIdAddCont4, serviceIdAddCont5, serviceIdAddCont6, serviceIdAddCont7, folderType, folderInfo, parentFolderId, positionInFolder, activeDate, entitlementTitleName, hddLocation, externalHddAppStatus, entitlementIdKamaji, mTime, freePsPlusContent, entitlementActiveFlag, sizeOtherHdd, entitlementHidden, preorderPlaceholderFlag, gatingEntitlementJson)
+                values
+                (@titleId, @contentId, @titleName, @metaDataPath, @lastAccessTime, @contentStatus, @onDisc, @parentalLevel, @visible, @sortPriority, @pathInfo, @lastAccessIndex, @dispLocation, @canRemove, @category, @contentType, @pathInfo2, @presentBoxStatus, @entitlement, @thumbnailUrl, @lastUpdateTime, @playableDate, @contentSize, @installDate, @platform, @uiCategory, @skuId, @disableLiveDetail, @linkType, @linkUri, @serviceIdAddCont1, @serviceIdAddCont2, @serviceIdAddCont3, @serviceIdAddCont4, @serviceIdAddCont5, @serviceIdAddCont6, @serviceIdAddCont7, @folderType, @folderInfo, @parentFolderId, @positionInFolder, @activeDate, @entitlementTitleName, @hddLocation, @externalHddAppStatus, @entitlementIdKamaji, @mTime, @freePsPlusContent, @entitlementActiveFlag, @sizeOtherHdd, @entitlementHidden, @preorderPlaceholderFlag, @gatingEntitlementJson)";
 
-            if (x == typeof(AppInfoTblRow))
-            {
-                return "tbl_appinfo";
-            }
+            var result = await _dbConnection.ExecuteAsync(sql, row);
+            count += result;
+        }
 
-            throw new Exception();
-        };
-
-        return await _dbConnection.InsertAsync(rows);
+        return count;
     }
 
     public async Task<int> InsertAppInfoRows(IReadOnlyCollection<AppInfoTblRow> rows)
