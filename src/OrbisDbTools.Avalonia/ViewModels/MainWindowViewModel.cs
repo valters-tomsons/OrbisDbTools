@@ -5,6 +5,7 @@ using OrbisDbTools.Lib.Controllers;
 using OrbisDbTools.PS4.Models;
 using ReactiveUI;
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
 
 namespace OrbisDbTools.Avalonia.ViewModels;
 
@@ -18,6 +19,8 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
     public ReactiveCommand<Unit, Unit> ForceDc { get; }
+
+    public EventHandler<DataGridCellEditEndedEventArgs> CellEditEnded { get; }
 
     private readonly MainWindowController _controller;
 
@@ -56,6 +59,16 @@ public class MainWindowViewModel : ViewModelBase
         ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
         AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
+
+        CellEditEnded += OnCellEditEnded;
+    }
+
+    private async void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    {
+        if (e.EditAction != DataGridEditAction.Commit) return;
+        if (e.Row.DataContext is not AppTitle editedApp) return;
+
+        await _controller.UpdateEditedApp(editedApp);
     }
 
     async Task FixDatabase()
@@ -147,6 +160,11 @@ public class MainWindowViewModel : ViewModelBase
         await UpdateDbItems();
         HideSpinner();
     }
+
+    // public void TitleNamePropertyChanged(object sender, PropertyChangedEventArgs a)
+    // {
+    //     Console.WriteLine();
+    // }
 
     private void ShowSpinner(string text)
     {

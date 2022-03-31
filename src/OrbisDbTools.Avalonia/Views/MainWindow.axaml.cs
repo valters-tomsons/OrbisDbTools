@@ -24,6 +24,9 @@ public class MainWindow : Window
         viewModel.SaveDbLocallyDialogAction = new Func<Task<Uri?>>(ShowSaveFileDialogWindow);
 
         DataContext = viewModel;
+
+        var dbGrid = this.FindControl<DataGrid>("DbGrid")!;
+        dbGrid.CellEditEnded += viewModel.CellEditEnded;
     }
 
     private void InitializeComponent()

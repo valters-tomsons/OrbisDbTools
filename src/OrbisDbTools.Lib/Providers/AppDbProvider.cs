@@ -151,6 +151,17 @@ public class AppDbProvider : IAsyncDisposable
         return await _dbConnection.ExecuteAsync(hideSql, new { titleIds = titles.Select(x => x.TitleId) });
     }
 
+    public async Task<int> WriteTitleChanges(string appTable, AppTitle title)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        var sql = $"UPDATE {appTable} set canRemove=@CanRemove, titleName=@TitleName where titleId=@TitleId";
+        return await _dbConnection.ExecuteAsync(sql, new { title.TitleId, title.CanRemove, title.TitleName });
+    }
+
     public async Task<long> GetExternalHddId()
     {
         if (_dbConnection is null)

@@ -213,4 +213,23 @@ public class MainWindowController
 
         return count;
     }
+
+    public async Task UpdateEditedApp(AppTitle app)
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+
+        foreach (var appTable in userAppTables)
+        {
+            try
+            {
+                await _dbProvider.WriteTitleChanges(appTable, app);
+                Console.WriteLine($"Changes written for {app.TitleId} in '{appTable}'");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to update {app.TitleId} in '{appTable}':");
+                Console.WriteLine(e.Message);
+            }
+        }
+    }
 }
