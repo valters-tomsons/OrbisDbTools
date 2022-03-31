@@ -79,9 +79,9 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Title ID" Binding="{Binding TitleId}"/>
                     <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
-                    <DataGridTextColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
-                    <DataGridTextColumn Header="Size (bytes)" Binding="{Binding ContentSize}"/>
-                    <DataGridTextColumn Header="External Storage" Binding="{Binding ExternalStorage}"/>
+                    <DataGridCheckBoxColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
+                    <DataGridTextColumn Header="Size (bytes)" IsReadOnly="true" Binding="{Binding ContentSize}"/>
+                    <DataGridCheckBoxColumn Header="External Storage" IsReadOnly="true" Binding="{Binding ExternalStorage}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
