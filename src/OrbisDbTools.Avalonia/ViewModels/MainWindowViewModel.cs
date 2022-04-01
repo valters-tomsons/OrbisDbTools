@@ -45,8 +45,9 @@ public class MainWindowViewModel : ViewModelBase
     public ObservableCollection<AppTitle> DbItems { get => dbItems; set => this.RaiseAndSetIfChanged(ref dbItems, value); }
     private ObservableCollection<AppTitle> dbItems = new();
 
-    public Func<Task<Uri?>>? OpenLocalDbDialogAction;
-    public Func<Task<Uri?>>? SaveDbLocallyDialogAction;
+    public Func<Task<Uri?>> OpenLocalDbDialogAction = null!;
+    public Func<Task<Uri?>> SaveDbLocallyDialogAction = null!;
+    public Func<string, Task<bool>> ShowWarningDialogAction = null!;
 
     public MainWindowViewModel(MainWindowController controller)
     {
@@ -73,9 +74,21 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task FixDatabase()
     {
+        var warningAccepted = await ShowWarningDialogAction(
+@"This action will populate database with applications that are installed on your internal drive, but missing from main system menu.
+Might take a while, depending on your storage size.
+Application from extended storage will not be added.
+
+This only works on FW >= 6.72!
+
+Continue?"
+        );
+
+        if (!warningAccepted) return;
+
         ShowSpinner("Rebuilding missing app entries...");
         _ = await _controller.FixMissingAppTitles();
-        await UpdateDbItems();
+        await UpdateDbViewItems();
         ShowProgressBar = false;
     }
 
@@ -86,7 +99,7 @@ public class MainWindowViewModel : ViewModelBase
             DbConnected = await _controller.PromptAndOpenLocalDatabase(OpenLocalDbDialogAction!).ConfigureAwait(true);
             if (DbConnected)
             {
-                await UpdateDbItems();
+                await UpdateDbViewItems();
                 IsLocalDb = true;
             }
         }
@@ -96,7 +109,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    async Task UpdateDbItems()
+    async Task UpdateDbViewItems()
     {
         var items = await _controller.QueryInstalledApps();
         DbItems = new(items);
@@ -126,7 +139,7 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             DbConnected = await _controller.ConnectAndDownload(consoleIpAddress).ConfigureAwait(false);
-            await UpdateDbItems();
+            await UpdateDbViewItems();
             IsLocalDb = false;
         }
         catch (Exception e)
@@ -141,15 +154,23 @@ public class MainWindowViewModel : ViewModelBase
     {
         ShowSpinner("Looking for PSN apps, please wait...");
         await _controller.HideAllKnownPsnApps();
-        await UpdateDbItems();
+        await UpdateDbViewItems();
         HideSpinner();
     }
 
     async Task RecalculateContent()
     {
+        var warningAccepted = await ShowWarningDialogAction(
+@"This action will update database with appropriate installation sizes, changes will only be visible in system storage settings menu.
+Might take a while, depending on your storage size.
+
+Continue?"
+            );
+        if (!warningAccepted) return;
+
         ShowSpinner("Calculating, please wait...");
         await _controller.ReCalculateInstalledAppSizes();
-        await UpdateDbItems();
+        await UpdateDbViewItems();
         HideSpinner();
     }
 
@@ -157,14 +178,9 @@ public class MainWindowViewModel : ViewModelBase
     {
         ShowSpinner("Allowing deletion, please wait...");
         await _controller.AllowDeleteInstalledApps();
-        await UpdateDbItems();
+        await UpdateDbViewItems();
         HideSpinner();
     }
-
-    // public void TitleNamePropertyChanged(object sender, PropertyChangedEventArgs a)
-    // {
-    //     Console.WriteLine();
-    // }
 
     private void ShowSpinner(string text)
     {
