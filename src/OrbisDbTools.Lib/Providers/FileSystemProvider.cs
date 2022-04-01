@@ -48,12 +48,22 @@ public class FileSystemProvider
         return results;
     }
 
-    private IEnumerable<FsTitle> ParseFileList(IReadOnlyCollection<string> contentPaths)
+    private static IReadOnlyCollection<FsTitle> ParseFileList(IReadOnlyCollection<string> contentPaths)
     {
-        return contentPaths.Select(x => new FsTitle(GetTitleIdFromContentPath(x), x));
+        var results = new List<FsTitle>(contentPaths.Count);
+
+        foreach (var path in contentPaths)
+        {
+            var titleId = GetTitleIdFromContentPath(path);
+            if (titleId is null) continue;
+            var fsTitle = new FsTitle(titleId, path);
+            results.Add(fsTitle);
+        }
+
+        return results;
     }
 
-    private static string GetTitleIdFromContentPath(string contentPath)
+    private static string? GetTitleIdFromContentPath(string contentPath)
     {
         var fileName = contentPath.Split('/').LastOrDefault();
 
