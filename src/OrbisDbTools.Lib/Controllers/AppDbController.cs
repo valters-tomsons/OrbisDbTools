@@ -169,10 +169,14 @@ public class MainWindowController
             Console.WriteLine($"Game info parsed: {browseRow.titleName}");
         }
 
-        var appRowsInserted = await _dbProvider.InsertAppBrowseRows(userAppTables.First(), appBrowseRows);
-        var infoRowsInserted = await _dbProvider.InsertAppInfoRows(appInfoRows);
+        foreach (var table in userAppTables)
+        {
+            var appRowsInserted = await _dbProvider.InsertAppBrowseRows(table, appBrowseRows);
+            Console.WriteLine($"Added {appRowsInserted} new apps to {table}");
+        }
 
-        Console.WriteLine($"Added {appRowsInserted} new apps, created {infoRowsInserted} app_info entries");
+        var infoRowsInserted = await _dbProvider.InsertAppInfoRows(appInfoRows);
+        Console.WriteLine($"Created {infoRowsInserted} new app_info entries");
 
         return missingTitlesWithSfo?.Where(x => appBrowseRows.Any(y => y.titleId.Equals(x.TitleId))).ToList() ?? new List<FsTitle>();
     }

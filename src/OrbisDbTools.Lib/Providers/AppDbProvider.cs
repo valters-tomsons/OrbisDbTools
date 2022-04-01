@@ -45,24 +45,22 @@ public class AppDbProvider : IAsyncDisposable
             throw new Exception("Cannot query database because it's not connected.");
         }
 
-        // Override table name mapper with our current appTable
-        // This is cursed and I should just write the sql, but I'm too lazy
-        SqlMapperExtensions.TableNameMapper = x =>
+        var count = 0;
+        foreach (var row in rows)
         {
-            if (x == typeof(AppBrowseTblRow))
-            {
-                return appTable;
-            }
+            // Cursed, I know
+            // don't care
 
-            if (x == typeof(AppInfoTblRow))
-            {
-                return "tbl_appinfo";
-            }
+            var sql = $@"INSERT into {appTable} 
+                (titleId, contentId, titleName, metaDataPath, lastAccessTime, contentStatus, onDisc, parentalLevel, visible, sortPriority, pathInfo, lastAccessIndex, dispLocation, canRemove, category, contentType, pathInfo2, presentBoxStatus, entitlement, thumbnailUrl, lastUpdateTime, playableDate, contentSize, installDate, platform, uiCategory, skuId, disableLiveDetail, linkType, linkUri, serviceIdAddCont1, serviceIdAddCont2, serviceIdAddCont3, serviceIdAddCont4, serviceIdAddCont5, serviceIdAddCont6, serviceIdAddCont7, folderType, folderInfo, parentFolderId, positionInFolder, activeDate, entitlementTitleName, hddLocation, externalHddAppStatus, entitlementIdKamaji, mTime, freePsPlusContent, entitlementActiveFlag, sizeOtherHdd, entitlementHidden, preorderPlaceholderFlag, gatingEntitlementJson)
+                values
+                (@titleId, @contentId, @titleName, @metaDataPath, @lastAccessTime, @contentStatus, @onDisc, @parentalLevel, @visible, @sortPriority, @pathInfo, @lastAccessIndex, @dispLocation, @canRemove, @category, @contentType, @pathInfo2, @presentBoxStatus, @entitlement, @thumbnailUrl, @lastUpdateTime, @playableDate, @contentSize, @installDate, @platform, @uiCategory, @skuId, @disableLiveDetail, @linkType, @linkUri, @serviceIdAddCont1, @serviceIdAddCont2, @serviceIdAddCont3, @serviceIdAddCont4, @serviceIdAddCont5, @serviceIdAddCont6, @serviceIdAddCont7, @folderType, @folderInfo, @parentFolderId, @positionInFolder, @activeDate, @entitlementTitleName, @hddLocation, @externalHddAppStatus, @entitlementIdKamaji, @mTime, @freePsPlusContent, @entitlementActiveFlag, @sizeOtherHdd, @entitlementHidden, @preorderPlaceholderFlag, @gatingEntitlementJson)";
 
-            throw new Exception();
-        };
+            var result = await _dbConnection.ExecuteAsync(sql, new { row.titleId, row.contentId, row.titleName, row.metaDataPath, row.lastAccessTime, row.contentStatus, row.onDisc, row.parentalLevel, row.visible, row.sortPriority, row.pathInfo, row.lastAccessIndex, row.dispLocation, row.canRemove, row.category, row.contentType, row.pathInfo2, row.presentBoxStatus, row.entitlement, row.thumbnailUrl, row.lastUpdateTime, row.playableDate, row.contentSize, row.installDate, row.platform, row.uiCategory, row.skuId, row.disableLiveDetail, row.linkType, row.linkUri, row.serviceIdAddCont1, row.serviceIdAddCont2, row.serviceIdAddCont3, row.serviceIdAddCont4, row.serviceIdAddCont5, row.serviceIdAddCont6, row.serviceIdAddCont7, row.folderType, row.folderInfo, row.parentFolderId, row.positionInFolder, row.activeDate, row.entitlementTitleName, row.hddLocation, row.externalHddAppStatus, row.entitlementIdKamaji, row.mTime, row.freePsPlusContent, row.entitlementActiveFlag, row.sizeOtherHdd, row.entitlementHidden, row.preorderPlaceholderFlag, row.gatingEntitlementJson });
+            count += result;
+        }
 
-        return await _dbConnection.InsertAsync(rows);
+        return count;
     }
 
     public async Task<int> InsertAppInfoRows(IReadOnlyCollection<AppInfoTblRow> rows)
