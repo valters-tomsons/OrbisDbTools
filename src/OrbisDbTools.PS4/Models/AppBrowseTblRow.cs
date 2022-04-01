@@ -27,7 +27,7 @@ public record AppBrowseTblRow
     public int presentBoxStatus { get; set; }
     public int entitlement { get; set; }
     public string? thumbnailUrl { get; set; }
-    public string? lastUpDateTime { get; set; }
+    public string? lastUpdateTime { get; set; }
     public string? playableDate { get; set; }
     public long contentSize { get; set; }
     public string? installDate { get; set; }
