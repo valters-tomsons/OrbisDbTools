@@ -99,6 +99,7 @@ public class MainWindow : Window
                 ContentMessage = $"File `{Path.GetFileName(filePath)}` already exists. Overwrite?",
                 Icon = MessageBox.Avalonia.Enums.Icon.Warning,
                 ShowInCenter = true,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
             });
 
             var buttonResult = await overwritePrompt.ShowDialog(this);
