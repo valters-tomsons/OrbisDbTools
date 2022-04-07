@@ -4,10 +4,11 @@ OrbisDbTools is a free cross-platform application for interacting with hacked `P
 
 ## Features
 
-* Re-calculate installed application size (fixes absurd game sizes in [this screen](promo/screen4.jpg))
-* Re-enable app deletion for user installed apps (and Playroom)
-* Hide apps that require PSN ([listed here](https://github.com/valters-tomsons/OrbisDbTools/blob/main/src/OrbisDbTools.PS4/KnownContent.cs#L22))
-* Rebuild apps missing from database [(internal storage only)](#rebuilding-database-for-extended-storage-apps)
+* Calculate installed app sizes (fixes absurd game sizes in [this screen](promo/screen4.jpg))
+* Enable deletion for installed apps
+* Hide apps that require PSN from the home screen ([listed here](https://github.com/valters-tomsons/OrbisDbTools/blob/main/src/OrbisDbTools.PS4/KnownContent.cs#L22))
+* Rebuild apps missing from database, that are installed in internal storage. [(alternative)](#rebuilding-database-for-extended-storage-apps)
+* Change app titles
 
 This tool will also automatically backup your `app.db` file to `$TMPDIR/app.db.$TIMESTAMP` when connecting via network. Local database files are backed up in file directory with `.$TIMESTAMP` appended to filename.
 
