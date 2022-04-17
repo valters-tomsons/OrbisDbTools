@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=OrbisDbTools
-Exec=me.tomsons.OrbisDbTools
+Exec=OrbisDbTools.Avalonia
 Type=Application
 Icon=org.gnome.Dictionary
 Categories=Development;X-PS4;
