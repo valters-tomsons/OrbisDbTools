@@ -453,3 +453,7 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 
 release-*/
+
+# Flatpak
+build-dir/
+.flatpak-builder/
