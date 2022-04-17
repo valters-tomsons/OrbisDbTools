@@ -1,0 +1,33 @@
+app-id: me.tomsons.OrbisDbTools
+runtime: org.freedesktop.Platform
+runtime-version: '21.08'
+sdk: org.freedesktop.Sdk
+command: OrbisDbTools.Avalonia
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --device=dri
+  - --socket=x11
+  - --socket=wayland
+  - --filesystem=host
+  - --filesystem=/tmp
+modules:
+  - name: OrbisDbTools
+    buildsystem: simple
+    build-commands:
+      - install -D libe_sqlite3.so /app/bin/libe_sqlite3.so
+      - install -D libHarfBuzzSharp.so /app/bin/libHarfBuzzSharp.so
+      - install -D libSkiaSharp.so /app/bin/libSkiaSharp.so
+      - install -D OrbisDbTools.Avalonia /app/bin/OrbisDbTools.Avalonia
+      - cp me.tomsons.OrbisDbTools.desktop /app/share/applications/me.tomsons.OrbisDbTools.desktop
+    sources:
+      - type: file
+        path: OrbisDbTools.Avalonia
+      - type: file
+        path: libe_sqlite3.so
+      - type: file
+        path: libHarfBuzzSharp.so
+      - type: file
+        path: libSkiaSharp.so
+      - type: file
+        path: me.tomsons.OrbisDbTools.desktop
