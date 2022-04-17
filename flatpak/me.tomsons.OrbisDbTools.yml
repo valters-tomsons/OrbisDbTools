@@ -19,7 +19,7 @@ modules:
       - install -D libHarfBuzzSharp.so /app/bin/libHarfBuzzSharp.so
       - install -D libSkiaSharp.so /app/bin/libSkiaSharp.so
       - install -D OrbisDbTools.Avalonia /app/bin/OrbisDbTools.Avalonia
-      - cp me.tomsons.OrbisDbTools.desktop /app/share/applications/me.tomsons.OrbisDbTools.desktop
+      - install -D me.tomsons.OrbisDbTools.desktop /app/share/applications/me.tomsons.OrbisDbTools.desktop
     sources:
       - type: file
         path: OrbisDbTools.Avalonia
