@@ -22,12 +22,12 @@ modules:
       - install -D me.tomsons.OrbisDbTools.desktop /app/share/applications/me.tomsons.OrbisDbTools.desktop
     sources:
       - type: file
-        path: OrbisDbTools.Avalonia
+        path: bin/OrbisDbTools.Avalonia
       - type: file
-        path: libe_sqlite3.so
+        path: bin/libe_sqlite3.so
       - type: file
-        path: libHarfBuzzSharp.so
+        path: bin/libHarfBuzzSharp.so
       - type: file
-        path: libSkiaSharp.so
+        path: bin/libSkiaSharp.so
       - type: file
         path: me.tomsons.OrbisDbTools.desktop
