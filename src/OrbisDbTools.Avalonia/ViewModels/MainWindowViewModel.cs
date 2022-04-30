@@ -1,6 +1,7 @@
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
+using OrbisDbTools.Lib.Constants;
 using OrbisDbTools.Lib.Controllers;
 using OrbisDbTools.PS4.Models;
 using ReactiveUI;
@@ -15,6 +16,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> BrowseDb { get; }
 
     public ReactiveCommand<Unit, Unit> AddMissingTitles { get; }
+    public ReactiveCommand<Unit, Unit> AddMissingDLC { get; }
     public ReactiveCommand<Unit, Unit> RecalculateDbContent { get; }
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
@@ -42,8 +44,11 @@ public class MainWindowViewModel : ViewModelBase
     public string ConnectionError { get => connectionError; set => this.RaiseAndSetIfChanged(ref connectionError, value); }
     private string connectionError = string.Empty;
 
-    public ObservableCollection<AppTitle> DbItems { get => dbItems; set => this.RaiseAndSetIfChanged(ref dbItems, value); }
-    private ObservableCollection<AppTitle> dbItems = new();
+    public ObservableCollection<AppTitle> AppDbItems { get => appDbItems; set => this.RaiseAndSetIfChanged(ref appDbItems, value); }
+    private ObservableCollection<AppTitle> appDbItems = new();
+
+    public ObservableCollection<AddContTblRow> DlcDbItems { get => dlcDbItems ; set => this.RaiseAndSetIfChanged(ref dlcDbItems, value); }
+    private ObservableCollection<AddContTblRow> dlcDbItems = new();
 
     public Func<Task<Uri?>> OpenLocalDbDialogAction = null!;
     public Func<Task<Uri?>> SaveDbLocallyDialogAction = null!;
@@ -60,6 +65,7 @@ public class MainWindowViewModel : ViewModelBase
         ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
         AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
+        AddMissingDLC = ReactiveCommand.CreateFromTask(FixDlcs);
 
         CellEditEnded += OnCellEditEnded;
     }
@@ -74,20 +80,24 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task FixDatabase()
     {
-        var warningAccepted = await ShowWarningDialogAction(
-@"This action will populate database with applications that are installed on your internal drive, but missing from main system menu.
-Might take a while, depending on your storage size.
-Application from extended storage will not be added.
-
-This only works on FW >= 6.72!
-
-Continue?"
-        );
-
+        var warningAccepted = await ShowWarningDialogAction(PromptMessages.FixDb);
         if (!warningAccepted) return;
 
         ShowSpinner("Rebuilding missing app entries...");
-        _ = await _controller.FixMissingAppTitles();
+        await _controller.FixMissingAppTitles();
+
+        await UpdateDbViewItems();
+        ShowProgressBar = false;
+    }
+
+    async Task FixDlcs()
+    {
+        var warningAccepted = await ShowWarningDialogAction(PromptMessages.FixDlcs);
+        if (!warningAccepted) return;
+
+        ShowSpinner("Rebuilding missing DLC entries...");
+        await _controller.RebuildAddCont();
+
         await UpdateDbViewItems();
         ShowProgressBar = false;
     }
@@ -111,8 +121,11 @@ Continue?"
 
     async Task UpdateDbViewItems()
     {
-        var items = await _controller.QueryInstalledApps();
-        DbItems = new(items);
+        var appDbItems = await _controller.QueryInstalledApps();
+        var dlcDbItems = await _controller.QueryInstalledDlc();
+
+        AppDbItems = new(appDbItems);
+        DlcDbItems = new(dlcDbItems);
     }
 
     async Task ForceDisconnect()
@@ -160,12 +173,7 @@ Continue?"
 
     async Task RecalculateContent()
     {
-        var warningAccepted = await ShowWarningDialogAction(
-@"This action will update database with appropriate installation sizes, changes will only be visible in system storage settings menu.
-Might take a while, depending on your storage size.
-
-Continue?"
-            );
+        var warningAccepted = await ShowWarningDialogAction(PromptMessages.CalculateSize);
         if (!warningAccepted) return;
 
         ShowSpinner("Calculating, please wait...");

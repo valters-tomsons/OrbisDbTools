@@ -75,15 +75,29 @@
                     </Grid>
                 </Button>
             </StackPanel>
-            <DataGrid x:Name="DbGrid" IsVisible="{Binding !ShowProgressBar}" Grid.Column="1" AutoGenerateColumns="False" Items="{Binding DbItems}" CanUserResizeColumns="True" CornerRadius="10">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Title ID" IsReadOnly="true" Binding="{Binding TitleId}"/>
-                    <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
-                    <DataGridCheckBoxColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
-                    <DataGridTextColumn Header="Size (bytes)" IsReadOnly="true" Binding="{Binding ContentSize}"/>
-                    <DataGridCheckBoxColumn Header="External Storage" IsReadOnly="true" Binding="{Binding ExternalStorage}"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <TabControl IsVisible="{Binding !ShowProgressBar}" Grid.Column="1">
+                <TabItem Header="Apps" VerticalContentAlignment="Center">
+                    <DataGrid x:Name="AppDbGrid" AutoGenerateColumns="False" Items="{Binding AppDbItems}" CanUserResizeColumns="True" CornerRadius="10">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TitleID" IsReadOnly="True" Binding="{Binding TitleId}"/>
+                            <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
+                            <DataGridCheckBoxColumn Header="Can Uninstall" Binding="{Binding CanRemove}"/>
+                            <DataGridTextColumn Header="Size (bytes)" IsReadOnly="true" Binding="{Binding ContentSize}"/>
+                            <DataGridCheckBoxColumn Header="External Storage" IsReadOnly="true" Binding="{Binding ExternalStorage}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="DLC" VerticalContentAlignment="Center">
+                    <DataGrid x:Name="DlcGrid" IsReadOnly="True" AutoGenerateColumns="False" Items="{Binding DlcDbItems}" CanUserResizeColumns="True" CornerRadius="10">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TitleID" Binding="{Binding title_id}"/>
+                            <DataGridTextColumn Header="Name" Binding="{Binding title}"/>
+                            <DataGridTextColumn Header="ContentId" Binding="{Binding content_id}"/>
+                            <DataGridTextColumn Header="DirName" Binding="{Binding dir_name}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
         </Grid>
 
         <Grid HorizontalAlignment="Center" IsVisible="{Binding ShowProgressBar}">

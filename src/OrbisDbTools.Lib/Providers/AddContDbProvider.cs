@@ -40,7 +40,7 @@ public class AddContDbProvider : IAsyncDisposable
             throw new Exception("Cannot query database because it's not connected.");
         }
 
-        const string sql = 
+        const string sql =
             @"select 
                 id, title_id, dir_name, content_id, title, version, attribute, status 
             from addcont
