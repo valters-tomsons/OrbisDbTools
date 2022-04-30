@@ -15,6 +15,8 @@ public struct OrbisSystemPaths
     public const string UserExternalAppMetadata = $"{UserAppMetadataPath}external/";
 
     public const string AppDbFileName = "app.db";
+    public const string AddContDbFileName = "addcont.db";
+
     public const string TblAppBrowse = "tbl_appbrowse";
     public const string AccountConfigFileName = "config.dat";
     public const string SfoFileName = "param.sfo";

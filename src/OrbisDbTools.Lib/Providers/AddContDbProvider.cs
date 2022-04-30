@@ -40,7 +40,11 @@ public class AddContDbProvider : IAsyncDisposable
             throw new Exception("Cannot query database because it's not connected.");
         }
 
-        const string sql = "select * from addcont";
+        const string sql = 
+            @"select 
+                id, title_id, dir_name, content_id, title, version, attribute, status 
+            from addcont
+            where status != 2";
         return await _dbConnection.QueryAsync<AddContTblRow>(sql);
     }
 }

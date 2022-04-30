@@ -48,6 +48,7 @@ public class AppDbProvider : IAsyncDisposable
         var count = 0;
         foreach (var row in rows)
         {
+            // Workaround for Dapper bug
             // Cursed, I know
             // don't care
 

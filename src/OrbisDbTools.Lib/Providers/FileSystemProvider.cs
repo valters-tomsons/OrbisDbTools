@@ -27,6 +27,18 @@ public class FileSystemProvider
             : null;
     }
 
+    public async Task<Uri?> DownloadAddContDb()
+    {
+        var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AddContDbFileName}");
+        const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AddContDbFileName;
+
+        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath);
+
+        return downloadSuccess
+            ? localPath
+            : null;
+    }
+
     public async Task<IReadOnlyCollection<FsTitle>> ScanFileSystemTitles()
     {
         var results = new List<FsTitle>();
