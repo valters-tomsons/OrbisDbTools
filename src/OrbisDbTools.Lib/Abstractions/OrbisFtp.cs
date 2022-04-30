@@ -49,6 +49,16 @@ public class OrbisFtp : IAsyncDisposable
         return resultStatus == FtpStatus.Success;
     }
 
+    public async Task<Stream?> OpenFileStream(string remotePath)
+    {
+        if (!IsConnected())
+        {
+            throw new Exception("Cannot download file because FTP is not connected.");
+        }
+
+        return await _ftpClient!.OpenReadAsync(remotePath, FtpDataType.Binary, 0, false);
+    }
+
     public async Task<IDictionary<string, long>?> ListFilesAndSizes(string remotePath, bool recursive)
     {
         if (!IsConnected())
