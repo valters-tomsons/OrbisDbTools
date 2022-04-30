@@ -1,10 +1,12 @@
 using System.Data;
 using System.Net;
+using LibOrbisPkg.PKG;
 using LibOrbisPkg.SFO;
 using OrbisDbTools.Lib.Abstractions;
 using OrbisDbTools.Lib.Helpers;
 using OrbisDbTools.Lib.Providers;
 using OrbisDbTools.PS4;
+using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils;
 
@@ -14,29 +16,29 @@ public class MainWindowController
 {
     private readonly OrbisFtp _ftp;
     private readonly AppDbProvider _dbProvider;
+    private readonly AddContDbProvider _dlcProvider;
     private readonly FileSystemProvider _discovery;
     private readonly GameDataProvider _sfoReader;
 
-    private Uri? _localAppDb;
-
-    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp, GameDataProvider sfoReader)
-    {
+    public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp, GameDataProvider sfoReader, AddContDbProvider dlcProvider)
+	{
         _discovery = discoveryService;
         _ftp = ftp;
         _dbProvider = dbProvider;
         _sfoReader = sfoReader;
-    }
+		_dlcProvider = dlcProvider;
+	}
 
     public async Task<bool> PromptAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
     {
-        _localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
-        if (_localAppDb is not null)
+        var localAppDb = await fileDialogPromptFunc().ConfigureAwait(true);
+        if (localAppDb is not null)
         {
-            var fileDirectory = Path.GetDirectoryName(_localAppDb.LocalPath);
-            var fileName = Path.GetFileName(_localAppDb.LocalPath);
+            var fileDirectory = Path.GetDirectoryName(localAppDb.LocalPath);
+            var fileName = Path.GetFileName(localAppDb.LocalPath);
 
-            File.Copy(_localAppDb.LocalPath, $"{fileDirectory}/{fileName}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
-            return await _dbProvider.OpenDatabase(_localAppDb.LocalPath).ConfigureAwait(true);
+            File.Copy(localAppDb.LocalPath, $"{fileDirectory}/{fileName}.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+            return await _dbProvider.OpenDatabase(localAppDb.LocalPath).ConfigureAwait(true);
         }
 
         return false;
@@ -49,24 +51,38 @@ public class MainWindowController
             throw new Exception("Not a valid IP address");
         }
 
-        if (!string.IsNullOrWhiteSpace(consoleIp))
+        if(string.IsNullOrWhiteSpace(consoleIp))
         {
-            var connected = await _ftp.OpenConnection(consoleIp);
-
-            if (!connected)
-            {
-                return false;
-            }
-
-            _localAppDb = await _discovery.DownloadAppDb();
-            if (_localAppDb is not null)
-            {
-                File.Copy(_localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
-                return await _dbProvider.OpenDatabase(_localAppDb.LocalPath);
-            }
+            return false;
         }
 
-        return false;
+		var connected = await _ftp.OpenConnection(consoleIp);
+		if (!connected)
+		{
+            return false;
+		}
+
+		var localAppDb = await _discovery.DownloadAppDb();
+		if (localAppDb is null)
+		{
+            await _ftp.DisposeAsync();
+            throw new Exception("Failed to download app.db, cannot continue");
+		}
+
+        var localAddContDb = await _discovery.DownloadAddContDb();
+		if (localAddContDb is null)
+		{
+            await _ftp.DisposeAsync();
+            throw new Exception("Failed to download addcont.db, cannot continue");
+		}
+
+		File.Copy(localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+        File.Copy(localAddContDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/addcont.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+
+		var appDbConnected = await _dbProvider.OpenDatabase(localAppDb.LocalPath);
+        var addContConnected = await _dlcProvider.OpenDatabase(localAddContDb.LocalPath);
+
+        return appDbConnected && addContConnected;
     }
 
     public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
@@ -84,6 +100,7 @@ public class MainWindowController
     public async Task CloseLocalDb()
     {
         await _dbProvider.DisposeAsync();
+        await _dlcProvider.DisposeAsync();
         Console.WriteLine("Finished disconnect");
     }
 
@@ -96,8 +113,7 @@ public class MainWindowController
             return Array.Empty<AppTitle>();
         }
 
-        var titles = await _dbProvider
-            .GetInstalledTitles(appTables.First());
+        var titles = await _dbProvider.GetInstalledTitles(appTables.First());
 
         if (titles is null)
         {
@@ -105,6 +121,11 @@ public class MainWindowController
         }
 
         return titles.ToList();
+    }
+
+    public async Task<IEnumerable<AddContTblRow>> QueryInstalledDlc()
+    {
+        return await _dlcProvider.GetInstalledContent();
     }
 
     public async Task<int> HideAllKnownPsnApps()
@@ -179,6 +200,43 @@ public class MainWindowController
         Console.WriteLine($"Created {infoRowsInserted} new app_info entries");
 
         return missingTitlesWithSfo?.Where(x => appBrowseRows.Any(y => y.titleId.Equals(x.TitleId))).ToList() ?? new List<FsTitle>();
+    }
+
+    public async Task RebuildAddCont()
+    {
+        var titleid = "CUSA24267";
+        var externalStr = true;
+
+        var dlcDataPath = $"/user/addcont/{titleid}/";
+        if (externalStr)
+        {
+            dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
+        }
+
+        var dlcFiles = await _ftp.ListFilesAndSizes(dlcDataPath, true);
+
+		if (dlcFiles is null)
+        {
+            return;
+        }
+
+        foreach(var file in dlcFiles.Where(x => x.Key.EndsWith("ac.pkg")))
+        {
+            using var fileStream = await _ftp.OpenFileStream(file.Key);
+
+			if (fileStream is null)
+            {
+                continue;
+            }
+
+            var pkgReader = new PkgReader(fileStream);
+            var hdr = pkgReader.ReadHeaderFromRemote();
+
+            // Work-around FluentFTP? bug
+            fileStream.Close();
+            await fileStream.DisposeAsync();
+            await Task.Delay(500);
+        }
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()
