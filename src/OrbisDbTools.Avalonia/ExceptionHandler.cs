@@ -11,14 +11,14 @@ public class ExceptionHandler : IObserver<Exception>
 {
     public void OnNext(Exception value)
     {
-        if (Debugger.IsAttached) Debugger.Break();
-
         var info = new Dictionary<string, string> {
             {"Type", value.GetType().ToString()},
             {"Message", value.Message},
             {"StackTrace", value.StackTrace ?? "N/A" }};
 
         PrintDictionary(info);
+
+        if (Debugger.IsAttached) Debugger.Break();
 
         RxApp.MainThreadScheduler.Schedule(() => throw value);
     }
