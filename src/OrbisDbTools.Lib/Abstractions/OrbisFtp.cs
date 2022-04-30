@@ -21,6 +21,8 @@ public class OrbisFtp : IAsyncDisposable
     public async Task<bool> OpenConnection(string ipAddress)
     {
         _ftpClient = FtpConnectionFactory.CreateClient(ipAddress);
+        _ftpClient.ConnectTimeout = 5000;
+
         _ftpProfile = await _ftpClient.AutoConnectAsync();
 
         var success = _ftpClient.IsConnected;
