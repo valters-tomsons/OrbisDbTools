@@ -1,4 +1,5 @@
 using Dapper;
+using Dapper.Contrib.Extensions;
 using Microsoft.Data.Sqlite;
 using OrbisDbTools.PS4.Models;
 using OrbisDbTools.Utils.Connections;
@@ -47,5 +48,33 @@ public class AddContDbProvider : IAsyncDisposable
             where status != 2";
 
         return await _dbConnection.QueryAsync<AddContTblRow>(sql);
+    }
+
+    public async Task<int> InsertAddContDlcItems(IReadOnlyCollection<DlcPkgDataDto> items)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        var count = 0;
+
+		foreach (var item in items)
+        {
+			var row = new AddContTblRow()
+			{
+				title_id = item.TitleId,
+				dir_name = item.DirName,
+				content_id = item.ContentId,
+				title = item.Title,
+				attribute = item.Version,
+				version = 1610612736
+			};
+
+            var inserted = await _dbConnection.InsertAsync(row);
+			count += inserted;
+        }
+
+        return count;
     }
 }
