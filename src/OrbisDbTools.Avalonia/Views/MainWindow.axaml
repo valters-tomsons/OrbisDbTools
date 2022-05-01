@@ -56,6 +56,10 @@
                     ToolTip.Tip="Scans installed apps on your console and rebuilds database to make these apps accessible.&#10;Notice: Currently only supports apps installed in internal storage">
                 Rebuild database</Button>
 
+                <Button IsEnabled="{Binding !IsLocalDb}" Command="{Binding AddMissingDLC}"
+                    ToolTip.Tip="">
+                Rebuild DLC</Button>
+
                 <Button IsEnabled="{Binding !IsLocalDb}" Command="{Binding RecalculateDbContent}"
                     ToolTip.Tip="Scans your console and updates the database with more reflective game size information. (Only reflected in console's &apos;Storage&apos; settings display)&#10;Notice: This may take a moment depending on your storage">
                 Recalculate content size</Button>
