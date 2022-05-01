@@ -163,7 +163,7 @@ public class MainWindowController
 
         var localSfoPaths = await _discovery.DownloadTitleSfos(missingTitles);
 
-        var parseSfoTasks = localSfoPaths.Select(async x => await _sfoReader.ReadSfo(x));
+        var parseSfoTasks = localSfoPaths.Select(async x => await _sfoReader.ParseLocalSfo(x));
         var parseSfoResults = await Task.WhenAll(parseSfoTasks);
 
         missingTitles.ForEach(x => x.SFO = Array.Find(parseSfoResults, y => (y!["TITLE_ID"] as Utf8Value)!.Value == x.TitleId));
@@ -204,39 +204,72 @@ public class MainWindowController
 
     public async Task RebuildAddCont()
     {
-        var titleid = "CUSA24267";
-        var externalStr = true;
+        var userAppTables = await _dbProvider.GetAppTables();
+        var installedTitles = await _dbProvider.GetInstalledTitles(userAppTables.First());
 
-        var dlcDataPath = $"/user/addcont/{titleid}/";
-        if (externalStr)
+        var installedDlc = await _dlcProvider.GetInstalledContent();
+
+        var newDlcInfo = new List<DlcPkgDataDto>();
+
+		foreach (var title in installedTitles)
         {
-            dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
-        }
+			var dlcDataPath = $"/user/addcont/{title.TitleId}/";
+			if (title.ExternalStorage)
+			{
+				dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
+			}
 
-        var dlcFiles = await _ftp.ListFilesAndSizes(dlcDataPath, true);
+            Console.WriteLine($"Enumerating DLC files for {title.TitleId} in '{dlcDataPath}'");
 
-		if (dlcFiles is null)
-        {
-            return;
-        }
+            var dlcFiles = await _ftp.ListTitleDlcFiles(dlcDataPath);
 
-        foreach(var file in dlcFiles.Where(x => x.Key.EndsWith("ac.pkg")))
-        {
-            using var fileStream = await _ftp.OpenFileStream(file.Key);
+            // Filter out already installed DLC
+            var ignoredFiles = dlcFiles.Where(x => installedDlc.Any(y => x.Contains($"{y.title_id}/{y.dir_name}")));
+            dlcFiles = dlcFiles.Except(ignoredFiles).ToList();
 
-			if (fileStream is null)
+            Console.WriteLine($"{dlcFiles.Count} new DLC files found for {title.TitleId}");
+            if(dlcFiles.Count == 0)
             {
                 continue;
             }
 
-            var pkgReader = new PkgReader(fileStream);
-            var hdr = pkgReader.ReadHeaderFromRemote();
+            var titleDlcInfo = new List<DlcPkgDataDto>();
+			foreach (var dlcPkg in dlcFiles)
+            {
+                using var pkgStream = await _ftp.OpenFileStream(dlcPkg);
 
-            // Work-around FluentFTP? bug
-            fileStream.Close();
-            await fileStream.DisposeAsync();
-            await Task.Delay(500);
+                if(pkgStream is null)
+                {
+                    Console.WriteLine($"Failed to open pkg stream: {dlcPkg}");
+                    continue;
+                }
+
+                var pkgInfo = await _sfoReader.GetDlcPkgData(pkgStream);
+                if(pkgInfo.header is null)
+                {
+                    Console.WriteLine($"Failed to read pkg header: {dlcPkg}");
+                    continue;
+                }
+
+                pkgStream.Close();
+                await pkgStream.DisposeAsync();
+                await Task.Delay(500);
+
+                var dlcData = new DlcPkgDataDto(title.TitleId, dlcPkg, pkgInfo.header.Value, pkgInfo.sfo);
+
+				if (string.IsNullOrWhiteSpace(dlcData.DirName))
+                {
+                    Console.WriteLine($"Not valid dlc data, skipping: {dlcPkg}");
+                    continue;
+                }
+
+                titleDlcInfo.Add(dlcData);
+            }
+
+            newDlcInfo.AddRange(titleDlcInfo);
         }
+
+		await _dlcProvider.InsertAddContDlcItems(newDlcInfo);
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()
