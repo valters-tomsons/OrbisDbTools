@@ -88,14 +88,17 @@
                     </DataGrid>
                 </TabItem>
                 <TabItem Header="DLC" VerticalContentAlignment="Center">
-                    <DataGrid x:Name="DlcGrid" IsReadOnly="True" AutoGenerateColumns="False" Items="{Binding DlcDbItems}" CanUserResizeColumns="True" CornerRadius="10">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="TitleID" Binding="{Binding title_id}"/>
-                            <DataGridTextColumn Header="Name" Binding="{Binding title}"/>
-                            <DataGridTextColumn Header="ContentId" Binding="{Binding content_id}"/>
-                            <DataGridTextColumn Header="DirName" Binding="{Binding dir_name}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                    <Grid>
+                        <TextBlock Margin="100" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding IsLocalDb}" Text="This page is only available when connected to console." />
+                        <DataGrid IsVisible="{Binding !IsLocalDb}" x:Name="DlcGrid" IsReadOnly="True" AutoGenerateColumns="False" Items="{Binding DlcDbItems}" CanUserResizeColumns="True" CornerRadius="10">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="TitleID" Binding="{Binding title_id}"/>
+                                <DataGridTextColumn Header="Name" Binding="{Binding title}"/>
+                                <DataGridTextColumn Header="ContentId" Binding="{Binding content_id}"/>
+                                <DataGridTextColumn Header="DirName" Binding="{Binding dir_name}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
                 </TabItem>
             </TabControl>
         </Grid>

@@ -109,8 +109,8 @@ public class MainWindowViewModel : ViewModelBase
             DbConnected = await _controller.PromptAndOpenLocalDatabase(OpenLocalDbDialogAction!).ConfigureAwait(true);
             if (DbConnected)
             {
-                await UpdateDbViewItems();
                 IsLocalDb = true;
+                await UpdateDbViewItems();
             }
         }
         catch (Exception e)
@@ -122,10 +122,13 @@ public class MainWindowViewModel : ViewModelBase
     async Task UpdateDbViewItems()
     {
         var appDbItems = await _controller.QueryInstalledApps();
-        var dlcDbItems = await _controller.QueryInstalledDlc();
-
         AppDbItems = new(appDbItems);
-        DlcDbItems = new(dlcDbItems);
+
+		if (!IsLocalDb)
+        {
+			var dlcDbItems = await _controller.QueryInstalledDlc();
+			DlcDbItems = new(dlcDbItems);
+        }
     }
 
     async Task ForceDisconnect()
@@ -152,8 +155,8 @@ public class MainWindowViewModel : ViewModelBase
         try
         {
             DbConnected = await _controller.ConnectAndDownload(consoleIpAddress).ConfigureAwait(false);
-            await UpdateDbViewItems();
             IsLocalDb = false;
+            await UpdateDbViewItems();
         }
         catch (Exception e)
         {

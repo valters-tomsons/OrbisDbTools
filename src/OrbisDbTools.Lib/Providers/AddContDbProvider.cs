@@ -45,6 +45,7 @@ public class AddContDbProvider : IAsyncDisposable
                 id, title_id, dir_name, content_id, title, version, attribute, status 
             from addcont
             where status != 2";
+
         return await _dbConnection.QueryAsync<AddContTblRow>(sql);
     }
 }
