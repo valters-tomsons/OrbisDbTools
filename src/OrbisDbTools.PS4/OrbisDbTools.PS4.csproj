@@ -14,7 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-        <ProjectReference Include="..\..\external\LibOrbisPkg\LibOrbisPkg.Core\LibOrbisPkg.Core.csproj" />
+    <ProjectReference Include="..\OrbisDbTools.Utils\OrbisDbTools.Utils.csproj" />
+    <ProjectReference Include="..\..\external\LibOrbisPkg\LibOrbisPkg.Core\LibOrbisPkg.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

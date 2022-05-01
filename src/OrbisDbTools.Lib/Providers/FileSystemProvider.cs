@@ -3,6 +3,7 @@ using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.Utils;
 using OrbisDbTools.PS4.Enums;
 using OrbisDbTools.Lib.Abstractions;
+using OrbisDbTools.Utils.Extensions;
 
 namespace OrbisDbTools.Lib.Providers;
 
@@ -66,25 +67,13 @@ public class FileSystemProvider
 
         foreach (var path in contentPaths)
         {
-            var titleId = GetTitleIdFromContentPath(path);
+            var titleId = path.GetTitleIdFromGamePkgPath();
             if (titleId is null) continue;
             var fsTitle = new FsTitle(titleId, path);
             results.Add(fsTitle);
         }
 
         return results;
-    }
-
-    private static string? GetTitleIdFromContentPath(string contentPath)
-    {
-        var fileName = contentPath.Split('/').LastOrDefault();
-
-        if (contentPath.EndsWith(".pkg"))
-        {
-            return fileName?.Replace(".pkg", string.Empty);
-        }
-
-        return fileName;
     }
 
     public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<FsTitle> titles)
