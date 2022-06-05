@@ -13,7 +13,7 @@ Continue?";
 
     public const string FixDlcs =
 @"This action will populate DLC database with content this is installed on your internal drive and currently attached extended storage
-Might take a while, depending on the count of the missing content.
+Might take a while, depending on amount of the missing content.
 
 Continue?";
 
