@@ -455,5 +455,8 @@ $RECYCLE.BIN/
 release-*/
 
 # Flatpak
-build-dir/
-.flatpak-builder/
+.flatpak/*
+*/build-dir/*
+*/.flatpak-builder/*
+
+*.so
