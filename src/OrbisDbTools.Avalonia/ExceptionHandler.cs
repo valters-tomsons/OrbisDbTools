@@ -11,36 +11,32 @@ public class ExceptionHandler : IObserver<Exception>
 {
     public void OnNext(Exception value)
     {
-        var info = new Dictionary<string, string> {
-            {"Type", value.GetType().ToString()},
-            {"Message", value.Message},
-            {"StackTrace", value.StackTrace ?? "N/A" }};
-
-        PrintDictionary(info);
-
-        if (Debugger.IsAttached) Debugger.Break();
-
-        RxApp.MainThreadScheduler.Schedule(() => throw value);
+        HandleException(value);
     }
 
     public void OnError(Exception error)
     {
-        if (Debugger.IsAttached) Debugger.Break();
-
-        var info = new Dictionary<string, string>() {
-            {"Type", error.GetType().ToString()},
-            {"Message", error.Message},
-            {"StackTrace", error.StackTrace ?? "N/A"}};
-
-        PrintDictionary(info);
-
-        RxApp.MainThreadScheduler.Schedule(() => throw error);
+        HandleException(error);
     }
 
     public void OnCompleted()
     {
         if (Debugger.IsAttached) Debugger.Break();
         RxApp.MainThreadScheduler.Schedule(() => throw new NotImplementedException());
+    }
+
+    private static void HandleException(Exception e)
+    {
+        var info = new Dictionary<string, string> {
+            {"Type", e.GetType().ToString()},
+            {"Message", e.Message},
+            {"StackTrace", e.StackTrace ?? "N/A" }};
+
+        PrintDictionary(info);
+
+        if (Debugger.IsAttached) Debugger.Break();
+
+        RxApp.MainThreadScheduler.Schedule(() => throw e);
     }
 
     private static void PrintDictionary(IDictionary<string, string> dictionary)
