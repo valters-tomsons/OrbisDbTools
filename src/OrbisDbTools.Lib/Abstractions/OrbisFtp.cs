@@ -21,6 +21,8 @@ public class OrbisFtp : IAsyncDisposable
     public async Task<bool> OpenConnection(string ipAddress)
     {
         _ftpClient = FtpConnectionFactory.CreateClient(ipAddress);
+        _ftpClient.ConnectTimeout = 5000;
+
         _ftpProfile = await _ftpClient.AutoConnectAsync();
 
         var success = _ftpClient.IsConnected;
@@ -49,6 +51,16 @@ public class OrbisFtp : IAsyncDisposable
         return resultStatus == FtpStatus.Success;
     }
 
+    public async Task<Stream?> OpenFileStream(string remotePath)
+    {
+        if (!IsConnected())
+        {
+            throw new Exception("Cannot download file because FTP is not connected.");
+        }
+
+        return await _ftpClient!.OpenReadAsync(remotePath, FtpDataType.Binary, 0, false);
+    }
+
     public async Task<IDictionary<string, long>?> ListFilesAndSizes(string remotePath, bool recursive)
     {
         if (!IsConnected())
@@ -66,6 +78,24 @@ public class OrbisFtp : IAsyncDisposable
         var listing = await _ftpClient!.GetListingAsync(remotePath, listingOption);
 
         return listing.ToDictionary(x => x.FullName, y => y.Size);
+    }
+
+    public async Task<IList<string>> ListTitleDlcFiles(string remotePath)
+    {
+        if (!IsConnected())
+        {
+            throw new Exception("Cannot download file because FTP is not connected.");
+        }
+
+        var exists = await _ftpClient!.DirectoryExistsAsync(remotePath);
+        if (!exists)
+        {
+			return Array.Empty<string>();
+        }
+
+        var listing = await _ftpClient!.GetListingAsync(remotePath, FtpListOption.Recursive);
+
+        return listing.Where(x => x.FullName.EndsWith("ac.pkg")).Select(x => x.FullName).ToList();
     }
 
     public async Task<long?> FileSizeInBytes(string remoteFilePath)

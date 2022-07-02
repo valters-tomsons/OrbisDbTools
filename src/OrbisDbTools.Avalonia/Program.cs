@@ -58,6 +58,7 @@ static class Program
             typeof(FileSystemProvider),
 
             typeof(AppDbProvider),
+            typeof(AddContDbProvider),
             typeof(GameDataProvider)
         });
 

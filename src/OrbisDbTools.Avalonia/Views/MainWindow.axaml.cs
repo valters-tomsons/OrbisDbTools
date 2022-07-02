@@ -26,8 +26,8 @@ public class MainWindow : Window
 
         DataContext = viewModel;
 
-        var dbGrid = this.FindControl<DataGrid>("DbGrid")!;
-        dbGrid.CellEditEnded += viewModel.CellEditEnded;
+        var appDbGrid = this.FindControl<DataGrid>("AppDbGrid")!;
+        appDbGrid.CellEditEnded += viewModel.CellEditEnded;
     }
 
     private void InitializeComponent()

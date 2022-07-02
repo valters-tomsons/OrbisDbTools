@@ -3,6 +3,7 @@ using OrbisDbTools.PS4.Constants;
 using OrbisDbTools.Utils;
 using OrbisDbTools.PS4.Enums;
 using OrbisDbTools.Lib.Abstractions;
+using OrbisDbTools.Utils.Extensions;
 
 namespace OrbisDbTools.Lib.Providers;
 
@@ -19,6 +20,18 @@ public class FileSystemProvider
     {
         var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
         const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName;
+
+        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath);
+
+        return downloadSuccess
+            ? localPath
+            : null;
+    }
+
+    public async Task<Uri?> DownloadAddContDb()
+    {
+        var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AddContDbFileName}");
+        const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AddContDbFileName;
 
         var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath);
 
@@ -54,25 +67,13 @@ public class FileSystemProvider
 
         foreach (var path in contentPaths)
         {
-            var titleId = GetTitleIdFromContentPath(path);
+            var titleId = path.GetTitleIdFromGamePkgPath();
             if (titleId is null) continue;
             var fsTitle = new FsTitle(titleId, path);
             results.Add(fsTitle);
         }
 
         return results;
-    }
-
-    private static string? GetTitleIdFromContentPath(string contentPath)
-    {
-        var fileName = contentPath.Split('/').LastOrDefault();
-
-        if (contentPath.EndsWith(".pkg"))
-        {
-            return fileName?.Replace(".pkg", string.Empty);
-        }
-
-        return fileName;
     }
 
     public async Task<IReadOnlyCollection<Uri>> DownloadTitleSfos(IReadOnlyCollection<FsTitle> titles)
