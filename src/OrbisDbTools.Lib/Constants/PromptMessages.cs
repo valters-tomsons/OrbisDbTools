@@ -12,8 +12,10 @@ This only works on FW >= 6.72!!!
 Continue?";
 
     public const string FixDlcs =
-@"This action will populate DLC database with content this is installed on your internal drive and currently attached extended storage
-Might take a while, depending on amount of the missing content.
+@"This action will forcefully populate DLC database with all DLC content that is installed on your all of your current storage devices.
+This might fix issues where game doesn't recognize content that's on your storage, MIGHT break something!!!
+
+Might take a while, depending on amount of the installed content.
 
 Continue?";
 
