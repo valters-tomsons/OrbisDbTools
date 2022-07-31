@@ -202,9 +202,10 @@ public class MainWindowViewModel : ViewModelBase
         HideSpinner();
     }
 
-    async Task CancelProgressTask()
+    Task CancelProgressTask()
     {
         _progressCancelation?.Cancel();
+        return Task.CompletedTask;
     }
 
     private CancellationToken? ShowSpinner(string text, bool allowCancel = false)
