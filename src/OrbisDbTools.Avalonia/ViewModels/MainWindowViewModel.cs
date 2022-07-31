@@ -40,7 +40,6 @@ public class MainWindowViewModel : ViewModelBase
     public bool ShowProgressBar { get => showProgressBar; set => this.RaiseAndSetIfChanged(ref showProgressBar, value); }
     private bool showProgressBar;
 
-
     public bool AllowProgressCancel { get => allowProgressCancel; set => this.RaiseAndSetIfChanged(ref allowProgressCancel, value); }
     private bool allowProgressCancel;
 
@@ -218,6 +217,7 @@ public class MainWindowViewModel : ViewModelBase
         ProgressText = text;
         ConnectionError = string.Empty;
         ShowProgressBar = true;
+        AllowProgressCancel = allowCancel;
 
         if (!allowCancel)
         {
@@ -225,7 +225,6 @@ public class MainWindowViewModel : ViewModelBase
         }
 
         _progressCancelation = new CancellationTokenSource();
-        AllowProgressCancel = true;
         return _progressCancelation.Token;
     }
 

@@ -16,6 +16,13 @@ public class FileSystemProvider
         _ftpClient = ftpClient;
     }
 
+    public async Task<bool> UploadAppDb(Uri localPath)
+    {
+        const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName;
+        var uploadSuccess = await _ftpClient.UploadFile(localPath.LocalPath, remotePath);
+        return uploadSuccess == FluentFTP.FtpStatus.Success;
+    }
+
     public async Task<Uri?> DownloadAppDb(CancellationToken cts = default)
     {
         var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");

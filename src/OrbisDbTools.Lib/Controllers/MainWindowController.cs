@@ -88,15 +88,14 @@ public class MainWindowController
 
     public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
     {
-        await _ftp.DisposeAsync();
         await _dbProvider.DisposeAsync();
         await _dlcProvider.DisposeAsync();
 
-        var targetPath = await fileDialogAction().ConfigureAwait(true);
-        if (targetPath is not null)
-        {
-            File.Copy($"{ClientConfig.TempDirectory.LocalPath}/app.db", targetPath.LocalPath, true);
-        }
+        var localAppDb = new Uri($"{ClientConfig.TempDirectory.LocalPath}/app.db", UriKind.Absolute);
+        var result = await _discovery.UploadAppDb(localAppDb);
+        Console.WriteLine($"app.db upload success: {result}");
+
+        await _ftp.DisposeAsync();
     }
 
     public async Task CloseLocalDb()
