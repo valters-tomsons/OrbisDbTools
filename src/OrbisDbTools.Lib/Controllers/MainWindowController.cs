@@ -90,6 +90,7 @@ public class MainWindowController
     {
         await _ftp.DisposeAsync();
         await _dbProvider.DisposeAsync();
+        await _dlcProvider.DisposeAsync();
 
         var targetPath = await fileDialogAction().ConfigureAwait(true);
         if (targetPath is not null)
