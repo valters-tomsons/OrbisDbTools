@@ -1,3 +1,4 @@
+using System.Net;
 using FluentFTP;
 using OrbisDbTools.Utils.Connections;
 
@@ -18,15 +19,19 @@ public class OrbisFtp : IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    public async Task<bool> OpenConnection(string ipAddress)
+    public async Task<bool> OpenConnection(IPEndPoint endpoint, CancellationToken cts = default)
     {
-        _ftpClient = FtpConnectionFactory.CreateClient(ipAddress);
+        _ftpClient = FtpConnectionFactory.CreateClient(endpoint);
         _ftpClient.ConnectTimeout = 5000;
 
-        _ftpProfile = await _ftpClient.AutoConnectAsync();
+        _ftpProfile = await _ftpClient.AutoConnectAsync(cts);
 
         var success = _ftpClient.IsConnected;
-        if (!success)
+        if (!success && cts.IsCancellationRequested)
+        {
+            throw new Exception("Connection cancelled by user");
+        }
+        else if (!success)
         {
             throw new Exception($"Could not connect to '{_ftpClient.Host}:{_ftpClient.Port}'.");
         }

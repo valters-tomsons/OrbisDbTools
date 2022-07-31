@@ -1,23 +1,20 @@
+using System.Net;
 using FluentFTP;
 
 namespace OrbisDbTools.Utils.Connections;
 
 public static class FtpConnectionFactory
 {
-    public static IFtpClient CreateClient(string ipAddress)
+    public static IFtpClient CreateClient(IPEndPoint endpoint)
     {
-        var parts = ipAddress.Split(':');
+        var host = endpoint.Address.ToString();
+        var port = endpoint.Port;
 
-        var ip = parts.FirstOrDefault();
-        var portString = parts.Length > 1 ? parts[1] : string.Empty;
-
-        var isPort = int.TryParse(portString, out var port);
-
-        if (!isPort)
+        if (port == 0)
         {
             port = 2121;
         }
 
-        return new FtpClient(ip, port, new());
+        return new FtpClient(host, port, new());
     }
 }
