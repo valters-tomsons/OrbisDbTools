@@ -23,6 +23,7 @@ public class MainWindow : Window
         viewModel.OpenLocalDbDialogAction = new Func<Task<Uri?>>(ShowFileBrowserDialogWindow);
         viewModel.SaveDbLocallyDialogAction = new Func<Task<Uri?>>(ShowSaveFileDialogWindow);
         viewModel.ShowWarningDialogAction = new Func<string, Task<bool>>(ShowWarningDialogWindow);
+        viewModel.ShowInfoDialogAction = new Func<string, Task>(ShowInfoDialogWindow);
 
         DataContext = viewModel;
 
@@ -100,6 +101,22 @@ public class MainWindow : Window
 
         var result = await prompt.ShowDialog(this);
         return result == ButtonResult.Ok;
+    }
+
+    public async Task ShowInfoDialogWindow(string infoMessage)
+    {
+        var prompt = MessageBoxManager.GetMessageBoxStandardWindow(new MessageBoxStandardParams()
+        {
+            ButtonDefinitions = ButtonEnum.Ok,
+            ContentTitle = "Finished!",
+            ContentMessage = infoMessage,
+            Icon = MessageBox.Avalonia.Enums.Icon.Info,
+            ShowInCenter = true,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+        });
+
+        await prompt.ShowDialog(this);
+        return;
     }
 
     private async Task<Uri?> PromptFileOverwrite(string filePath, SaveFileDialog saveDialog)

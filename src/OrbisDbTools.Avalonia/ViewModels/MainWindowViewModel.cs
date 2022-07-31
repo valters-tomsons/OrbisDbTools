@@ -58,6 +58,7 @@ public class MainWindowViewModel : ViewModelBase
     public Func<Task<Uri?>> OpenLocalDbDialogAction = null!;
     public Func<Task<Uri?>> SaveDbLocallyDialogAction = null!;
     public Func<string, Task<bool>> ShowWarningDialogAction = null!;
+    public Func<string, Task> ShowInfoDialogAction = null!;
 
     private CancellationTokenSource? _progressCancelation;
 
@@ -141,7 +142,11 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task ForceDisconnect()
     {
-        ShowSpinner("Disconnecting, please wait...");
+        var prompt = IsLocalDb ? PromptMessages.LocalOverwriteWarning : PromptMessages.FtpUploadWarning;
+        var warningAccepted = await ShowWarningDialogAction(prompt);
+        if (!warningAccepted) return;
+
+        ShowSpinner("Finishing...");
 
         if (IsLocalDb)
         {
@@ -149,7 +154,8 @@ public class MainWindowViewModel : ViewModelBase
         }
         else
         {
-            await _controller.DisconnectRemoteAndPromptSave(SaveDbLocallyDialogAction!).ConfigureAwait(true);
+            await _controller.WriteChangesAndDisconnect().ConfigureAwait(true);
+            await ShowInfoDialogAction(PromptMessages.UploadFinished);
         }
 
         DbConnected = false;

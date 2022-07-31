@@ -86,7 +86,7 @@ public class MainWindowController
         return appDbConnected && addContConnected;
     }
 
-    public async Task DisconnectRemoteAndPromptSave(Func<Task<Uri>> fileDialogAction)
+    public async Task WriteChangesAndDisconnect()
     {
         await _dbProvider.DisposeAsync();
         await _dlcProvider.DisposeAsync();

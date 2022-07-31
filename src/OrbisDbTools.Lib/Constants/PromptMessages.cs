@@ -24,4 +24,13 @@ Continue?";
 Might take a while, depending on your storage size.
 
 Continue?";
+
+    public const string FtpUploadWarning =
+"This action will write current database changes to your console, proceed at your own risk.";
+
+    public const string LocalOverwriteWarning =
+"This action will update currently open database file, proceed at your own risk.";
+
+    public const string UploadFinished =
+"Database on your console has been updated, it's recommended to refresh the system menu.";
 }
