@@ -26,6 +26,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
 
     public ReactiveCommand<Unit, Unit> WriteAndExitCommand { get; }
+    public ReactiveCommand<Unit, Unit> CloseAndExitCommand { get; }
 
     public EventHandler<DataGridCellEditEndedEventArgs> CellEditEnded { get; }
     public EventHandler<DataGridCellPointerPressedEventArgs> CellPointerPressed { get; }
@@ -74,12 +75,14 @@ public class MainWindowViewModel : ViewModelBase
         RecalculateDbContent = ReactiveCommand.CreateFromTask(RecalculateContent);
         AllowDeleteApps = ReactiveCommand.CreateFromTask(MarkCanRemoveInstalled);
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
-        WriteAndExitCommand = ReactiveCommand.CreateFromTask(WriteAndExit);
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
         AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
         AddMissingDLC = ReactiveCommand.CreateFromTask(FixDlcs);
         CancelProgress = ReactiveCommand.CreateFromTask(CancelProgressTask);
         DeleteAppCommand = ReactiveCommand.CreateFromTask<AppTitle>(DeleteApp);
+
+        WriteAndExitCommand = ReactiveCommand.CreateFromTask(WriteAndExit);
+        CloseAndExitCommand = ReactiveCommand.CreateFromTask(CloseAndExit);
 
         CellEditEnded += OnCellEditEnded;
         CellPointerPressed += OnCellPointerPressed;
@@ -182,6 +185,14 @@ public class MainWindowViewModel : ViewModelBase
             await _controller.WriteChangesAndDisconnect().ConfigureAwait(true);
             await ShowInfoDialogAction(PromptMessages.UploadFinished);
         }
+
+        DbConnected = false;
+        ShowProgressBar = false;
+    }
+
+    async Task CloseAndExit()
+    {
+        await _controller.CloseRemoteConnections();
 
         DbConnected = false;
         ShowProgressBar = false;

@@ -71,13 +71,20 @@
                 <Button Command="{Binding HidePsnApps}"
                     ToolTip.Tip="Hides applications which do not work without active PSN connection.&#10;It also removes applications like &apos;What's New&apos; from the home screen among others">
                 Hide PSN Apps</Button>
+
                 <Button Command="{Binding WriteAndExitCommand}"
-                    ToolTip.Tip="Close connections and write changes to current database.">
+                    ToolTip.Tip="Closes open connections and writes changes to the database.">
                     <Grid>
                         <TextBlock IsVisible="{Binding !IsLocalDb}" Text="Upload &amp; Disconnect"/>
                         <TextBlock IsVisible="{Binding IsLocalDb}" Text="Update &amp; Close"/>
                     </Grid>
                 </Button>
+
+                <Button IsVisible="{Binding !IsLocalDb}" Command="{Binding CloseAndExitCommand}"
+                    ToolTip.Tip="Closes open connections without uploading changes.">
+                    <TextBlock Text="Close"/>
+                </Button>
+
             </StackPanel>
             <TabControl IsVisible="{Binding !ShowProgressBar}" Grid.Column="1">
                 <TabItem Header="Apps" VerticalContentAlignment="Center">

@@ -97,6 +97,13 @@ public class MainWindowController
         await _ftp.DisposeAsync();
     }
 
+    public async Task CloseRemoteConnections()
+    {
+        await _dbProvider.DisposeAsync();
+        await _dlcProvider.DisposeAsync();
+        await _ftp.DisposeAsync();
+    }
+
     public async Task CloseLocalDb()
     {
         await _dbProvider.DisposeAsync();
