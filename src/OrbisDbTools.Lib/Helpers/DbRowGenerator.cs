@@ -14,9 +14,9 @@ namespace OrbisDbTools.Lib.Helpers
                 contentId = appInfo.ContentId,
                 titleName = appInfo.Title,
                 metaDataPath = appInfo.MetaDataPath,
-                lastAccessTime = "2018-07-27 15:06:46.822",
+                lastAccessTime = DateTime.UtcNow.ToOrbisDateTime(),
                 contentSize = appInfo.ContentSize ?? 0,
-                installDate = "2018-07-27 15:06:46.802",
+                installDate = DateTime.UtcNow.ToOrbisDateTime(),
                 hddLocation = appInfo.HddLocation,
                 mTime = DateTime.UtcNow.ToOrbisDateTime(),
                 category = appInfo.Category,
@@ -27,13 +27,13 @@ namespace OrbisDbTools.Lib.Helpers
 
         public static IReadOnlyCollection<AppInfoTblRow> GenerateAppInfoRows(FsTitle title, AppInfoDto appInfo)
         {
-            return new List<AppInfoTblRow>
+            var results = new List<AppInfoTblRow>
         {
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_access_index", Val = "67" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_booted", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_last_access_time", Val = "2018-07-27 15:04:39.822" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_last_access_time", Val = DateTime.UtcNow.ToOrbisDateTime() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_contents_status", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_mtime", Val = "2018-07-27 15:04:40.635" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_mtime", Val = DateTime.UtcNow.ToOrbisDateTime() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#_update_index", Val = "74" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "#exit_type", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "ATTRIBUTE_INTERNAL", Val = "0" },
@@ -41,7 +41,7 @@ namespace OrbisDbTools.Lib.Helpers
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "DISP_LOCATION_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "DOWNLOAD_DATA_SIZE", Val = appInfo.DownloadDataSize.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "FORMAT", Val = "obs" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "PARENTAL_LEVEL", Val = "1" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "PARENTAL_LEVEL", Val = appInfo.ParentalLevel.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "PT_PARAM", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "REMOTE_PLAY_KEY_ASSIGN", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_1", Val = "0" },
@@ -51,7 +51,7 @@ namespace OrbisDbTools.Lib.Helpers
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_5", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_6", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "SERVICE_ID_ADDCONT_ADD_7", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "SYSTEM_VER", Val = "33751040" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "SYSTEM_VER", Val = appInfo.SystemVer },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "USER_DEFINED_PARAM_1", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "USER_DEFINED_PARAM_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "USER_DEFINED_PARAM_3", Val = "0" },
@@ -61,7 +61,7 @@ namespace OrbisDbTools.Lib.Helpers
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_current_slot", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_disable_live_detail", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_external_hdd_app_status", Val = "0" },
-            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_hdd_location", Val = "0" },
+            new AppInfoTblRow() { TitleId = title.TitleId, Key = "_hdd_location", Val = appInfo.HddLocation.ToString() },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_path_info", Val = "3113537756987392" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_path_info_2", Val = "0" },
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "_size_other_hdd", Val = appInfo.SizeOtherHdd.ToString() },
@@ -83,6 +83,21 @@ namespace OrbisDbTools.Lib.Helpers
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "TITLE_ID", Val = title.TitleId},
             new AppInfoTblRow() { TitleId = title.TitleId, Key = "VERSION", Val = appInfo.Version},
         };
+
+            var attribute2 = (title.SFO!.GetValueByName("ATTRIBUTE2") as IntegerValue)?.Value.ToString();
+            if (attribute2 != null)
+            {
+                results.Add(
+                    new AppInfoTblRow()
+                    {
+                        TitleId = title.TitleId,
+                        Key = "ATTRIBUTE2",
+                        Val = attribute2
+                    }
+                );
+            }
+
+            return results;
         }
     }
 }
