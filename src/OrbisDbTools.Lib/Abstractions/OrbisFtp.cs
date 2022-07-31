@@ -22,8 +22,6 @@ public class OrbisFtp : IAsyncDisposable
     public async Task<bool> OpenConnection(IPEndPoint endpoint, CancellationToken cts = default)
     {
         _ftpClient = FtpConnectionFactory.CreateClient(endpoint);
-        _ftpClient.ConnectTimeout = 5000;
-
         _ftpProfile = await _ftpClient.AutoConnectAsync(cts);
 
         var success = _ftpClient.IsConnected;
@@ -112,5 +110,15 @@ public class OrbisFtp : IAsyncDisposable
 
         var fileInfo = await _ftpClient!.GetObjectInfoAsync(remoteFilePath) ?? null;
         return fileInfo?.Size;
+    }
+
+    public async Task<FtpStatus> UploadFile(string local, string remote)
+    {
+        if (!IsConnected())
+        {
+            throw new Exception("Cannot upload file because FTP is not connected.");
+        }
+
+        return await _ftpClient!.UploadFileAsync(local, remote);
     }
 }

@@ -1,3 +1,6 @@
 [submodule "external/LibOrbisPkg"]
-	path = external/LibOrbisPkg
-	url = https://github.com/valters-tomsons/LibOrbisPkg
+path = external/LibOrbisPkg
+url = https://github.com/valters-tomsons/LibOrbisPkg
+[submodule "external/FluentFTP"]
+path = external/FluentFTP
+url = https://github.com/valters-tomsons/FluentFTP
