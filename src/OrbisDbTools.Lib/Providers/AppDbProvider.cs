@@ -161,6 +161,28 @@ public class AppDbProvider : IAsyncDisposable
         return await _dbConnection.ExecuteAsync(sql, new { title.TitleId, title.CanRemove, title.TitleName });
     }
 
+    public async Task<int> DeleteApp(string appTable, AppTitle title)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        var sql = $"DELETE from {appTable} where titleId=@TitleId";
+        return await _dbConnection.ExecuteAsync(sql, new { title.TitleId });
+    }
+
+    public async Task<int> DeleteAppInfo(AppTitle title)
+    {
+        if (_dbConnection is null)
+        {
+            throw new Exception("Cannot query database because it's not connected.");
+        }
+
+        const string sql = "DELETE from tbl_appinfo where titleId=@TitleId";
+        return await _dbConnection.ExecuteAsync(sql, new { title.TitleId });
+    }
+
     public async Task<long> GetExternalHddId()
     {
         if (_dbConnection is null)

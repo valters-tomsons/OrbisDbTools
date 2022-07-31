@@ -29,6 +29,7 @@ public class MainWindow : Window
 
         var appDbGrid = this.FindControl<DataGrid>("AppDbGrid")!;
         appDbGrid.CellEditEnded += viewModel.CellEditEnded;
+        appDbGrid.CellPointerPressed += viewModel.CellPointerPressed;
     }
 
     private void InitializeComponent()

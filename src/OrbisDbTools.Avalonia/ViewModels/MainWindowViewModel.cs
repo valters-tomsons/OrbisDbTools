@@ -23,8 +23,10 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
     public ReactiveCommand<Unit, Unit> ForceDc { get; }
     public ReactiveCommand<Unit, Unit> CancelProgress { get; }
+    public ReactiveCommand<AppTitle, Unit> DeleteAppCommand { get; }
 
     public EventHandler<DataGridCellEditEndedEventArgs> CellEditEnded { get; }
+    public EventHandler<DataGridCellPointerPressedEventArgs> CellPointerPressed { get; }
 
     private readonly MainWindowController _controller;
 
@@ -75,8 +77,29 @@ public class MainWindowViewModel : ViewModelBase
         AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
         AddMissingDLC = ReactiveCommand.CreateFromTask(FixDlcs);
         CancelProgress = ReactiveCommand.CreateFromTask(CancelProgressTask);
+        DeleteAppCommand = ReactiveCommand.CreateFromTask<AppTitle>(DeleteApp);
 
         CellEditEnded += OnCellEditEnded;
+        CellPointerPressed += OnCellPointerPressed;
+    }
+
+    private void OnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
+    {
+        if (e.Row.DataContext is not AppTitle title) return;
+
+#pragma warning disable CS0618 // I don't want to rewrite this, so we'll just use this for now
+        if (e.PointerPressedEventArgs.MouseButton.ToString() != "Right") return;
+#pragma warning restore CS0618
+
+        var flyout = new MenuFlyout
+        {
+            Items = new[]
+            {
+                new MenuItem { Header = "Delete App", Command = DeleteAppCommand, CommandParameter = title }
+            }
+        };
+
+        flyout.ShowAt(e.Cell, true);
     }
 
     private async void OnCellEditEnded(object? _, DataGridCellEditEndedEventArgs e)
@@ -205,6 +228,15 @@ public class MainWindowViewModel : ViewModelBase
         await _controller.AllowDeleteInstalledApps();
         await UpdateDbViewItems();
         HideSpinner();
+    }
+
+    async Task DeleteApp(AppTitle title)
+    {
+        var warningAccepted = await ShowWarningDialogAction($"Really want to delete '{title.TitleName}' from database?");
+        if (!warningAccepted) return;
+
+        await _controller.DeleteApp(title);
+        await UpdateDbViewItems();
     }
 
     Task CancelProgressTask()

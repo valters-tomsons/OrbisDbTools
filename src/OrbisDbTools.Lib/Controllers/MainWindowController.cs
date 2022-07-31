@@ -1,6 +1,5 @@
 using System.Data;
 using System.Net;
-using LibOrbisPkg.PKG;
 using LibOrbisPkg.SFO;
 using OrbisDbTools.Lib.Abstractions;
 using OrbisDbTools.Lib.Helpers;
@@ -327,5 +326,19 @@ public class MainWindowController
                 Console.WriteLine(e.Message);
             }
         }
+    }
+
+    public async Task DeleteApp(AppTitle app)
+    {
+        var userAppTables = await _dbProvider.GetAppTables();
+
+        foreach (var appTable in userAppTables)
+        {
+            var count = await _dbProvider.DeleteApp(appTable, app);
+            Console.WriteLine($"App {app.TitleId} | {count} deleted from '{appTable}'");
+        }
+
+        var appInfoDeletes = await _dbProvider.DeleteAppInfo(app);
+        Console.WriteLine($"{appInfoDeletes} tbl_appinfo {app.TitleId} rows deleted");
     }
 }
