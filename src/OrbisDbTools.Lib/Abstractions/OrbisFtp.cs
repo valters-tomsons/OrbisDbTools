@@ -119,6 +119,7 @@ public class OrbisFtp : IAsyncDisposable
             throw new Exception("Cannot upload file because FTP is not connected.");
         }
 
+        await _ftpClient!.DeleteFileAsync(remote);
         return await _ftpClient!.UploadFileAsync(local, remote);
     }
 }
