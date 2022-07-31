@@ -5,12 +5,12 @@ namespace OrbisDbTools.Utils.Connections;
 
 public static class SqlConnectionFactory
 {
-    public static async Task<SqliteConnection?> OpenConnection(string dataSource)
+    public static async Task<SqliteConnection?> OpenConnection(string dataSource, CancellationToken cts = default)
     {
         await AssertFileIntegrity(dataSource);
 
         var conn = new SqliteConnection($"Data Source={dataSource}");
-        await conn.OpenAsync();
+        await conn.OpenAsync(cts);
         return conn;
     }
 

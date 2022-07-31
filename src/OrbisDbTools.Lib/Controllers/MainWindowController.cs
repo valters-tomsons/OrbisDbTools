@@ -21,13 +21,13 @@ public class MainWindowController
     private readonly GameDataProvider _sfoReader;
 
     public MainWindowController(FileSystemProvider discoveryService, AppDbProvider dbProvider, OrbisFtp ftp, GameDataProvider sfoReader, AddContDbProvider dlcProvider)
-	{
+    {
         _discovery = discoveryService;
         _ftp = ftp;
         _dbProvider = dbProvider;
         _sfoReader = sfoReader;
-		_dlcProvider = dlcProvider;
-	}
+        _dlcProvider = dlcProvider;
+    }
 
     public async Task<bool> PromptAndOpenLocalDatabase(Func<Task<Uri>> fileDialogPromptFunc)
     {
@@ -44,43 +44,44 @@ public class MainWindowController
         return false;
     }
 
-    public async Task<bool> ConnectAndDownload(string consoleIp)
+    public async Task<bool> ConnectAndDownload(string consoleIp, CancellationToken cts = default)
     {
-        if (!IPAddress.TryParse(consoleIp, out var _))
+        if (string.IsNullOrWhiteSpace(consoleIp))
+        {
+            return false;
+        }
+
+        var parsed = IPEndPoint.TryParse(consoleIp, out var endpoint);
+        if (!parsed || endpoint is null)
         {
             throw new Exception("Not a valid IP address");
         }
 
-        if(string.IsNullOrWhiteSpace(consoleIp))
+        var connected = await _ftp.OpenConnection(endpoint, cts);
+        if (!connected)
         {
             return false;
         }
 
-		var connected = await _ftp.OpenConnection(consoleIp);
-		if (!connected)
-		{
-            return false;
-		}
-
-		var localAppDb = await _discovery.DownloadAppDb();
-		if (localAppDb is null)
-		{
+        var localAppDb = await _discovery.DownloadAppDb(cts);
+        if (localAppDb is null)
+        {
             await _ftp.DisposeAsync();
             throw new Exception("Failed to download app.db, cannot continue");
-		}
+        }
 
-        var localAddContDb = await _discovery.DownloadAddContDb();
-		if (localAddContDb is null)
-		{
+        var localAddContDb = await _discovery.DownloadAddContDb(cts);
+        if (localAddContDb is null)
+        {
             await _ftp.DisposeAsync();
             throw new Exception("Failed to download addcont.db, cannot continue");
-		}
+        }
 
-		File.Copy(localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
+        File.Copy(localAppDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/app.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
         File.Copy(localAddContDb.LocalPath, $"{ClientConfig.TempDirectory.LocalPath}/addcont.db.{DateTimeOffset.Now.ToUnixTimeSeconds()}");
 
-		var appDbConnected = await _dbProvider.OpenDatabase(localAppDb.LocalPath);
-        var addContConnected = await _dlcProvider.OpenDatabase(localAddContDb.LocalPath);
+        var appDbConnected = await _dbProvider.OpenDatabase(localAppDb.LocalPath, cts);
+        var addContConnected = await _dlcProvider.OpenDatabase(localAddContDb.LocalPath, cts);
 
         return appDbConnected && addContConnected;
     }
@@ -211,13 +212,13 @@ public class MainWindowController
 
         var newDlcInfo = new List<DlcPkgDataDto>();
 
-		foreach (var title in installedTitles)
+        foreach (var title in installedTitles)
         {
-			var dlcDataPath = $"/user/addcont/{title.TitleId}/";
-			if (title.ExternalStorage)
-			{
-				dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
-			}
+            var dlcDataPath = $"/user/addcont/{title.TitleId}/";
+            if (title.ExternalStorage)
+            {
+                dlcDataPath = OrbisSystemPaths.ExternalDriveMountPoint0 + dlcDataPath;
+            }
 
             Console.WriteLine($"Enumerating DLC files for {title.TitleId} in '{dlcDataPath}'");
 
@@ -228,24 +229,24 @@ public class MainWindowController
             dlcFiles = dlcFiles.Except(ignoredFiles).ToList();
 
             Console.WriteLine($"{dlcFiles.Count} new DLC files found for {title.TitleId}");
-            if(dlcFiles.Count == 0)
+            if (dlcFiles.Count == 0)
             {
                 continue;
             }
 
             var titleDlcInfo = new List<DlcPkgDataDto>();
-			foreach (var dlcPkg in dlcFiles)
+            foreach (var dlcPkg in dlcFiles)
             {
                 using var pkgStream = await _ftp.OpenFileStream(dlcPkg);
 
-                if(pkgStream is null)
+                if (pkgStream is null)
                 {
                     Console.WriteLine($"Failed to open pkg stream: {dlcPkg}");
                     continue;
                 }
 
                 var pkgInfo = await _sfoReader.GetDlcPkgData(pkgStream);
-                if(pkgInfo.header is null)
+                if (pkgInfo.header is null)
                 {
                     Console.WriteLine($"Failed to read pkg header: {dlcPkg}");
                     continue;
@@ -257,7 +258,7 @@ public class MainWindowController
 
                 var dlcData = new DlcPkgDataDto(title.TitleId, dlcPkg, pkgInfo.header.Value, pkgInfo.sfo);
 
-				if (string.IsNullOrWhiteSpace(dlcData.DirName))
+                if (string.IsNullOrWhiteSpace(dlcData.DirName))
                 {
                     Console.WriteLine($"Not valid dlc data, skipping: {dlcPkg}");
                     continue;
@@ -269,7 +270,7 @@ public class MainWindowController
             newDlcInfo.AddRange(titleDlcInfo);
         }
 
-		await _dlcProvider.InsertAddContDlcItems(newDlcInfo);
+        await _dlcProvider.InsertAddContDlcItems(newDlcInfo);
     }
 
     public async Task<int> ReCalculateInstalledAppSizes()

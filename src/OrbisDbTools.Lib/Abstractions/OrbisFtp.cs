@@ -45,14 +45,14 @@ public class OrbisFtp : IAsyncDisposable
         return _ftpClient?.IsConnected == true;
     }
 
-    public async Task<bool> DownloadFile(Uri localPath, string remotePath)
+    public async Task<bool> DownloadFile(Uri localPath, string remotePath, CancellationToken cts = default)
     {
         if (!IsConnected())
         {
             throw new Exception("Cannot download file because FTP is not connected.");
         }
 
-        var resultStatus = await _ftpClient!.DownloadFileAsync(localPath.LocalPath, remotePath);
+        var resultStatus = await _ftpClient!.DownloadFileAsync(localPath.LocalPath, remotePath, token: cts);
         return resultStatus == FtpStatus.Success;
     }
 
@@ -95,7 +95,7 @@ public class OrbisFtp : IAsyncDisposable
         var exists = await _ftpClient!.DirectoryExistsAsync(remotePath);
         if (!exists)
         {
-			return Array.Empty<string>();
+            return Array.Empty<string>();
         }
 
         var listing = await _ftpClient!.GetListingAsync(remotePath, FtpListOption.Recursive);

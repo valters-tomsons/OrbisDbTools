@@ -112,6 +112,7 @@
             <StackPanel VerticalAlignment="Center" Orientation="Vertical">
                 <TextBlock Margin="15" TextAlignment="Center" FontFamily="SF Pro Display" FontSize="18" Text="{Binding ProgressText}" />
                 <ProgressBar Margin="15" IsIndeterminate="True"/>
+                <Button Command="{Binding CancelProgress}" IsVisible="{Binding AllowProgressCancel}" Content="Cancel" FontFamily="SF Pro Display" FontSize="18" HorizontalAlignment="Center" />
             </StackPanel>
         </Grid>
     </Grid>

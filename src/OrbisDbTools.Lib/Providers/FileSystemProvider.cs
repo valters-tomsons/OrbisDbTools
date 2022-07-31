@@ -16,24 +16,24 @@ public class FileSystemProvider
         _ftpClient = ftpClient;
     }
 
-    public async Task<Uri?> DownloadAppDb()
+    public async Task<Uri?> DownloadAppDb(CancellationToken cts = default)
     {
         var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AppDbFileName}");
         const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AppDbFileName;
 
-        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath);
+        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath, cts);
 
         return downloadSuccess
             ? localPath
             : null;
     }
 
-    public async Task<Uri?> DownloadAddContDb()
+    public async Task<Uri?> DownloadAddContDb(CancellationToken cts = default)
     {
         var localPath = new Uri($"{ClientConfig.TempDirectory.LocalPath}/{OrbisSystemPaths.AddContDbFileName}");
         const string remotePath = OrbisSystemPaths.MmsFolderPath + OrbisSystemPaths.AddContDbFileName;
 
-        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath);
+        var downloadSuccess = await _ftpClient.DownloadFile(localPath, remotePath, cts);
 
         return downloadSuccess
             ? localPath

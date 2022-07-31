@@ -11,10 +11,10 @@ namespace OrbisDbTools.Lib.Providers;
 /// </summary>
 public class AddContDbProvider : IAsyncDisposable
 {
-	private SqliteConnection? _dbConnection;
+    private SqliteConnection? _dbConnection;
 
-	public async ValueTask DisposeAsync()
-	{
+    public async ValueTask DisposeAsync()
+    {
         if (_dbConnection is not null)
         {
             await _dbConnection.CloseAsync();
@@ -22,15 +22,15 @@ public class AddContDbProvider : IAsyncDisposable
         }
 
         GC.SuppressFinalize(this);
-	}
+    }
 
     /// <summary>
     /// Opens a connection to a local database file
     /// </summary>
     /// <param name="dbPath">Local path to SQLite database</param>
-    public async Task<bool> OpenDatabase(string dbPath)
+    public async Task<bool> OpenDatabase(string dbPath, CancellationToken cts = default)
     {
-        _dbConnection = await SqlConnectionFactory.OpenConnection(dbPath);
+        _dbConnection = await SqlConnectionFactory.OpenConnection(dbPath, cts);
         return _dbConnection != null;
     }
 
@@ -59,20 +59,20 @@ public class AddContDbProvider : IAsyncDisposable
 
         var count = 0;
 
-		foreach (var item in items)
+        foreach (var item in items)
         {
-			var row = new AddContTblRow()
-			{
-				title_id = item.TitleId,
-				dir_name = item.DirName,
-				content_id = item.ContentId,
-				title = item.Title,
-				attribute = item.Version,
-				version = 1610612736
-			};
+            var row = new AddContTblRow()
+            {
+                title_id = item.TitleId,
+                dir_name = item.DirName,
+                content_id = item.ContentId,
+                title = item.Title,
+                attribute = item.Version,
+                version = 1610612736
+            };
 
             var inserted = await _dbConnection.InsertAsync(row);
-			count += inserted;
+            count += inserted;
         }
 
         return count;

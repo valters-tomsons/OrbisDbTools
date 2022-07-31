@@ -1,3 +1,4 @@
+using System.Threading;
 using System;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
     public ReactiveCommand<Unit, Unit> ForceDc { get; }
+    public ReactiveCommand<Unit, Unit> CancelProgress { get; }
 
     public EventHandler<DataGridCellEditEndedEventArgs> CellEditEnded { get; }
 
@@ -38,6 +40,10 @@ public class MainWindowViewModel : ViewModelBase
     public bool ShowProgressBar { get => showProgressBar; set => this.RaiseAndSetIfChanged(ref showProgressBar, value); }
     private bool showProgressBar;
 
+
+    public bool AllowProgressCancel { get => allowProgressCancel; set => this.RaiseAndSetIfChanged(ref allowProgressCancel, value); }
+    private bool allowProgressCancel;
+
     public string ProgressText { get => progressText; set => this.RaiseAndSetIfChanged(ref progressText, value); }
     private string progressText = string.Empty;
 
@@ -47,12 +53,14 @@ public class MainWindowViewModel : ViewModelBase
     public ObservableCollection<AppTitle> AppDbItems { get => appDbItems; set => this.RaiseAndSetIfChanged(ref appDbItems, value); }
     private ObservableCollection<AppTitle> appDbItems = new();
 
-    public ObservableCollection<AddContTblRow> DlcDbItems { get => dlcDbItems ; set => this.RaiseAndSetIfChanged(ref dlcDbItems, value); }
+    public ObservableCollection<AddContTblRow> DlcDbItems { get => dlcDbItems; set => this.RaiseAndSetIfChanged(ref dlcDbItems, value); }
     private ObservableCollection<AddContTblRow> dlcDbItems = new();
 
     public Func<Task<Uri?>> OpenLocalDbDialogAction = null!;
     public Func<Task<Uri?>> SaveDbLocallyDialogAction = null!;
     public Func<string, Task<bool>> ShowWarningDialogAction = null!;
+
+    private CancellationTokenSource? _progressCancelation;
 
     public MainWindowViewModel(MainWindowController controller)
     {
@@ -66,6 +74,7 @@ public class MainWindowViewModel : ViewModelBase
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
         AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
         AddMissingDLC = ReactiveCommand.CreateFromTask(FixDlcs);
+        CancelProgress = ReactiveCommand.CreateFromTask(CancelProgressTask);
 
         CellEditEnded += OnCellEditEnded;
     }
@@ -124,10 +133,10 @@ public class MainWindowViewModel : ViewModelBase
         var appDbItems = await _controller.QueryInstalledApps();
         AppDbItems = new(appDbItems);
 
-		if (!IsLocalDb)
+        if (!IsLocalDb)
         {
-			var dlcDbItems = await _controller.QueryInstalledDlc();
-			DlcDbItems = new(dlcDbItems);
+            var dlcDbItems = await _controller.QueryInstalledDlc();
+            DlcDbItems = new(dlcDbItems);
         }
     }
 
@@ -150,11 +159,11 @@ public class MainWindowViewModel : ViewModelBase
 
     async Task DownloadDatabase()
     {
-        ShowSpinner("Connecting, please wait...");
+        var cts = ShowSpinner("Connecting, please wait...", true) ?? default;
 
         try
         {
-            DbConnected = await _controller.ConnectAndDownload(consoleIpAddress).ConfigureAwait(false);
+            DbConnected = await _controller.ConnectAndDownload(consoleIpAddress, cts).ConfigureAwait(false);
             IsLocalDb = false;
             await UpdateDbViewItems();
         }
@@ -193,7 +202,12 @@ public class MainWindowViewModel : ViewModelBase
         HideSpinner();
     }
 
-    private void ShowSpinner(string text)
+    async Task CancelProgressTask()
+    {
+        _progressCancelation?.Cancel();
+    }
+
+    private CancellationToken? ShowSpinner(string text, bool allowCancel = false)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -203,6 +217,15 @@ public class MainWindowViewModel : ViewModelBase
         ProgressText = text;
         ConnectionError = string.Empty;
         ShowProgressBar = true;
+
+        if (!allowCancel)
+        {
+            return null;
+        }
+
+        _progressCancelation = new CancellationTokenSource();
+        AllowProgressCancel = true;
+        return _progressCancelation.Token;
     }
 
     private void HideSpinner()
