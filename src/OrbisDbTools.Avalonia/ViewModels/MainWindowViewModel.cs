@@ -16,14 +16,16 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> ConnectDb { get; }
     public ReactiveCommand<Unit, Unit> BrowseDb { get; }
 
+    public ReactiveCommand<Unit, Unit> CancelProgress { get; }
+    public ReactiveCommand<AppTitle, Unit> DeleteAppCommand { get; }
+
     public ReactiveCommand<Unit, Unit> AddMissingTitles { get; }
     public ReactiveCommand<Unit, Unit> AddMissingDLC { get; }
     public ReactiveCommand<Unit, Unit> RecalculateDbContent { get; }
     public ReactiveCommand<Unit, Unit> AllowDeleteApps { get; }
     public ReactiveCommand<Unit, Unit> HidePsnApps { get; }
-    public ReactiveCommand<Unit, Unit> ForceDc { get; }
-    public ReactiveCommand<Unit, Unit> CancelProgress { get; }
-    public ReactiveCommand<AppTitle, Unit> DeleteAppCommand { get; }
+
+    public ReactiveCommand<Unit, Unit> WriteAndExitCommand { get; }
 
     public EventHandler<DataGridCellEditEndedEventArgs> CellEditEnded { get; }
     public EventHandler<DataGridCellPointerPressedEventArgs> CellPointerPressed { get; }
@@ -72,7 +74,7 @@ public class MainWindowViewModel : ViewModelBase
         RecalculateDbContent = ReactiveCommand.CreateFromTask(RecalculateContent);
         AllowDeleteApps = ReactiveCommand.CreateFromTask(MarkCanRemoveInstalled);
         HidePsnApps = ReactiveCommand.CreateFromTask(HidePSNApps);
-        ForceDc = ReactiveCommand.CreateFromTask(ForceDisconnect);
+        WriteAndExitCommand = ReactiveCommand.CreateFromTask(WriteAndExit);
         BrowseDb = ReactiveCommand.CreateFromTask(BrowseLocalDatabase);
         AddMissingTitles = ReactiveCommand.CreateFromTask(FixDatabase);
         AddMissingDLC = ReactiveCommand.CreateFromTask(FixDlcs);
@@ -163,7 +165,7 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
-    async Task ForceDisconnect()
+    async Task WriteAndExit()
     {
         var prompt = IsLocalDb ? PromptMessages.LocalOverwriteWarning : PromptMessages.FtpUploadWarning;
         var warningAccepted = await ShowWarningDialogAction(prompt);

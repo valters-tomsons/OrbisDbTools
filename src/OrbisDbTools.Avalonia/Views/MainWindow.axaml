@@ -71,7 +71,7 @@
                 <Button Command="{Binding HidePsnApps}"
                     ToolTip.Tip="Hides applications which do not work without active PSN connection.&#10;It also removes applications like &apos;What's New&apos; from the home screen among others">
                 Hide PSN Apps</Button>
-                <Button Command="{Binding ForceDc}"
+                <Button Command="{Binding WriteAndExitCommand}"
                     ToolTip.Tip="Close connections and write changes to current database.">
                     <Grid>
                         <TextBlock IsVisible="{Binding !IsLocalDb}" Text="Upload &amp; Disconnect"/>
