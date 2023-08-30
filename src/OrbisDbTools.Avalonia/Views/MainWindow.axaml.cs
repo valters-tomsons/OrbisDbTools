@@ -6,13 +6,13 @@ using Avalonia.Markup.Xaml;
 using OrbisDbTools.Avalonia.ViewModels;
 using System.Linq;
 using System.Collections.Generic;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
-using MessageBox.Avalonia.DTO;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
+using MsBox.Avalonia.Dto;
 
 namespace OrbisDbTools.Avalonia.Views;
 
-public class MainWindow : Window
+public partial class MainWindow : Window
 {
     public MainWindow() { }
 
@@ -90,33 +90,33 @@ public class MainWindow : Window
 
     public async Task<bool> ShowWarningDialogWindow(string warningMessage)
     {
-        var prompt = MessageBoxManager.GetMessageBoxStandardWindow(new MessageBoxStandardParams()
+        var prompt = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams()
         {
             ButtonDefinitions = ButtonEnum.OkCancel,
             ContentTitle = "Warning!",
             ContentMessage = warningMessage,
-            Icon = MessageBox.Avalonia.Enums.Icon.Warning,
+            Icon = MsBox.Avalonia.Enums.Icon.Warning,
             ShowInCenter = true,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
         });
 
-        var result = await prompt.ShowDialog(this);
+        var result = await prompt.ShowAsPopupAsync(this);
         return result == ButtonResult.Ok;
     }
 
     public async Task ShowInfoDialogWindow(string infoMessage)
     {
-        var prompt = MessageBoxManager.GetMessageBoxStandardWindow(new MessageBoxStandardParams()
+        var prompt = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams()
         {
             ButtonDefinitions = ButtonEnum.Ok,
             ContentTitle = "Finished!",
             ContentMessage = infoMessage,
-            Icon = MessageBox.Avalonia.Enums.Icon.Info,
+            Icon = MsBox.Avalonia.Enums.Icon.Info,
             ShowInCenter = true,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
         });
 
-        await prompt.ShowDialog(this);
+        await prompt.ShowAsPopupAsync(this);
         return;
     }
 
@@ -127,17 +127,17 @@ public class MainWindow : Window
 
         while (true)
         {
-            var overwritePrompt = MessageBoxManager.GetMessageBoxStandardWindow(new MessageBoxStandardParams
+            var overwritePrompt = MessageBoxManager.GetMessageBoxStandard(new MessageBoxStandardParams
             {
                 ButtonDefinitions = ButtonEnum.OkCancel,
                 ContentTitle = "Overwrite?",
                 ContentMessage = $"File `{Path.GetFileName(filePath)}` already exists. Overwrite?",
-                Icon = MessageBox.Avalonia.Enums.Icon.Warning,
+                Icon = MsBox.Avalonia.Enums.Icon.Warning,
                 ShowInCenter = true,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner
             });
 
-            var buttonResult = await overwritePrompt.ShowDialog(this);
+            var buttonResult = await overwritePrompt.ShowAsPopupAsync(this);
 
             if (buttonResult == ButtonResult.Ok)
             {

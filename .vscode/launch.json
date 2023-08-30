@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/src/OrbisDbTools.Avalonia/bin/Debug/net6.0/OrbisDbTools.Avalonia.dll",
+            "program": "${workspaceFolder}/src/OrbisDbTools.Avalonia/bin/Debug/net7.0/OrbisDbTools.Avalonia.dll",
             "args": [],
             "cwd": "${workspaceFolder}/src/OrbisDbTools.Avalonia",
             "console": "internalConsole",

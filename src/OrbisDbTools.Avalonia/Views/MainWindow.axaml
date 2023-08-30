@@ -88,7 +88,7 @@
             </StackPanel>
             <TabControl IsVisible="{Binding !ShowProgressBar}" Grid.Column="1">
                 <TabItem Header="Apps" VerticalContentAlignment="Center">
-                    <DataGrid x:Name="AppDbGrid" AutoGenerateColumns="False" Items="{Binding AppDbItems}" CanUserResizeColumns="True" CornerRadius="10">
+                    <DataGrid x:Name="AppDbGrid" AutoGenerateColumns="False" ItemsSource="{Binding AppDbItems}" CanUserResizeColumns="True" CornerRadius="10">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="TitleID" IsReadOnly="True" Binding="{Binding TitleId}"/>
                             <DataGridTextColumn Header="Name" Binding="{Binding TitleName}"/>
@@ -101,7 +101,7 @@
                 <TabItem Header="DLC" VerticalContentAlignment="Center">
                     <Grid>
                         <TextBlock Margin="100" FontSize="30" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding IsLocalDb}" Text="This page is only available when connected to console." />
-                        <DataGrid IsVisible="{Binding !IsLocalDb}" x:Name="DlcGrid" IsReadOnly="True" AutoGenerateColumns="False" Items="{Binding DlcDbItems}" CanUserResizeColumns="True" CornerRadius="10">
+                        <DataGrid IsVisible="{Binding !IsLocalDb}" x:Name="DlcGrid" IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding DlcDbItems}" CanUserResizeColumns="True" CornerRadius="10">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="TitleID" Binding="{Binding title_id}"/>
                                 <DataGridTextColumn Header="Name" Binding="{Binding title}"/>

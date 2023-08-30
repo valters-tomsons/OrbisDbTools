@@ -92,17 +92,11 @@ public class MainWindowViewModel : ViewModelBase
     {
         if (e.Row.DataContext is not AppTitle title) return;
 
-#pragma warning disable CS0618 // I don't want to rewrite this, so we'll just use this for now
-        if (e.PointerPressedEventArgs.MouseButton.ToString() != "Right") return;
-#pragma warning restore CS0618
+        var flyout = new MenuFlyout();
 
-        var flyout = new MenuFlyout
-        {
-            Items = new[]
-            {
-                new MenuItem { Header = "Delete App", Command = DeleteAppCommand, CommandParameter = title }
-            }
-        };
+        flyout.Items.Add(
+            new MenuItem { Header = "Delete App", Command = DeleteAppCommand, CommandParameter = title }
+        );
 
         flyout.ShowAt(e.Cell, true);
     }
