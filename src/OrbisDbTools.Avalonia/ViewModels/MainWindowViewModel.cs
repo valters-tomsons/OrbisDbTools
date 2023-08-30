@@ -8,6 +8,7 @@ using OrbisDbTools.PS4.Models;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using Avalonia.Controls;
+using Avalonia.Input;
 
 namespace OrbisDbTools.Avalonia.ViewModels;
 
@@ -91,6 +92,7 @@ public class MainWindowViewModel : ViewModelBase
     private void OnCellPointerPressed(object? sender, DataGridCellPointerPressedEventArgs e)
     {
         if (e.Row.DataContext is not AppTitle title) return;
+        if (!e.PointerPressedEventArgs.GetCurrentPoint(null).Properties.IsRightButtonPressed) return;
 
         var flyout = new MenuFlyout();
 
