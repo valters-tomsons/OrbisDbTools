@@ -1,6 +1,6 @@
 # OrbisDbTools
 
-OrbisDbTools is a free cross-platform application for interacting with jailbroken `PlayStation®4` system databases.  
+OrbisDbTools is a free cross-platform application for interacting with a PS4 database via FTP.  
 
 ## Features
 
